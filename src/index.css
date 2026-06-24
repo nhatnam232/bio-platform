@@ -11,12 +11,12 @@ body {
   margin: 0;
   background: #000;
   color: #fff;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* ===== Lưới nền kiểu Vercel ===== */
+/* ===== Lưới nền ===== */
 .grid-bg {
   background-color: #000;
   background-image:
@@ -34,7 +34,7 @@ body {
   mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, #000 0%, transparent 95%);
 }
 
-/* ===== Quầng sáng theo màu nhấn ===== */
+/* ===== Quầng sáng ===== */
 @keyframes glowPulse {
   0%, 100% { opacity: 0.45; transform: translate3d(0, 0, 0) scale(1); }
   50% { opacity: 0.8; transform: translate3d(0, -12px, 0) scale(1.12); }
@@ -48,10 +48,7 @@ body {
 }
 
 /* ===== Xuất hiện ===== */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .fade-in { animation: fadeIn 0.45s ease both; }
@@ -60,10 +57,19 @@ body {
 @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 .caret { animation: blink 1s step-end infinite; }
 
-/* ===== Quét sáng nút ===== */
-@keyframes scan { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
+/* ===== Hiệu ứng tên ===== */
+@keyframes nameGlow { 0%, 100% { text-shadow: 0 0 8px currentColor; } 50% { text-shadow: 0 0 22px currentColor; } }
+.fx-glow { animation: nameGlow 2s ease-in-out infinite; }
+@keyframes hueShift { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+.fx-rainbow { animation: hueShift 4s linear infinite; }
+@keyframes gradientMove { to { background-position: 200% center; } }
+.fx-gradient { background: linear-gradient(90deg, #ffffff, #888888, #ffffff); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientMove 3s linear infinite; }
+@keyframes shakeX { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+.fx-shake { display: inline-block; animation: shakeX 0.4s ease-in-out infinite; }
+@keyframes heartPop { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
+.heart-pop { animation: heartPop 0.35s ease; }
 
-/* ===== Thanh cuộn gọn ===== */
+/* ===== Thanh cuộn ===== */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
