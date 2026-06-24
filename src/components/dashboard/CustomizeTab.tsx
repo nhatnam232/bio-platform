@@ -1,14 +1,67 @@
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useEditor } from '../../context/EditorContext'
 import { Theme } from '../../types'
 import Toggle from '../ui/Toggle'
 import { Card, Label, inputCls } from '../ui/Field'
-import { FONTS, BG_EFFECTS, NAME_EFFECTS } from '../../lib/effects'
+import { FONTS, BG_EFFECTS, NAME_EFFECTS, Option } from '../../lib/effects'
+import PickerModal, { PickerOption } from '../ui/PickerModal'
+import NameText from '../NameText'
+
+const LAYOUTS: Option[] = [
+  { id: 'card', label: 'Card' },
+  { id: 'wide', label: 'Wide' },
+  { id: 'minimal', label: 'Minimal' },
+]
+
+const BG_ICON: Record<string, string> = {
+  snow: '❄', stars: '★', particles: '✦', rain: '|', fireflies: '✦', matrix: '0', bubbles: '◦', hearts: '❤',
+}
+
+const labelOf = (opts: Option[], id: string | undefined) => (opts.find((o) => o.id === (id || '')) || opts[0]).label
+
+function FontPreview({ id }: { id: string }) {
+  const style = { fontFamily: id }
+  return <span className="text-lg" style={style}>Aa Bb 123</span>
+}
+
+function NamePreview({ id }: { id: string }) {
+  return <NameText text="Name" effect={id} />
+}
+
+function BgPreview({ id }: { id: string }) {
+  if (!id) return <span className="text-xs text-zinc-600">Không</span>
+  const icon = BG_ICON[id] || '✦'
+  const items = [0, 1, 2, 3, 4]
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {items.map((i) => {
+        const st = { left: i * 22 + 6 + '%', animationDuration: 2 + i * 0.4 + 's', animationDelay: i * 0.3 + 's' }
+        return <span key={i} className="fx-fall absolute top-0 text-white/70 text-sm" style={st}>{icon}</span>
+      })}
+    </div>
+  )
+}
+
+function LayoutPreview({ id }: { id: string }) {
+  if (id === 'wide') return (
+    <div className="w-16 h-10 rounded border border-white/30 flex gap-1 p-1">
+      <div className="w-4 bg-white/30 rounded-sm" />
+      <div className="flex-1 flex flex-col gap-1"><div className="h-1.5 bg-white/30 rounded" /><div className="h-1.5 w-2/3 bg-white/20 rounded" /></div>
+    </div>
+  )
+  if (id === 'minimal') return (
+    <div className="w-12 h-12 rounded border border-white/30 flex flex-col items-center justify-center gap-1"><div className="h-1.5 w-6 bg-white/30 rounded" /><div className="h-1 w-4 bg-white/20 rounded" /></div>
+  )
+  return (
+    <div className="w-12 h-14 rounded border border-white/30 flex flex-col items-center pt-1.5 gap-1"><div className="w-5 h-5 rounded-full bg-white/30" /><div className="h-1.5 w-7 bg-white/30 rounded" /><div className="h-1 w-5 bg-white/20 rounded" /></div>
+  )
+}
 
 export default function CustomizeTab() {
   const { p, update, setTheme, setBg, upload, uploading } = useEditor()
   const theme: Theme = p.theme ?? {}
   const [descPreview, setDescPreview] = useState(false)
+  const [picker, setPicker] = useState<string | null>(null)
   const upBtn = 'px-3 py-2 border border-white/15 hover:border-white/40 rounded-md text-xs cursor-pointer whitespace-nowrap transition'
 
   const uploadRow = (label: string, value: string, folder: string, accept: string, onUrl: (u: string) => void) => (
@@ -20,6 +73,26 @@ export default function CustomizeTab() {
       </div>
     </div>
   )
+
+  const settingRow = (label: string, value: string, preview: ReactNode, onClick: () => void) => (
+    <button onClick={onClick} className="w-full flex items-center justify-between gap-3 border border-white/10 hover:border-white/30 rounded-lg px-3 py-2.5 transition text-left">
+      <div>
+        <div className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</div>
+        <div className="text-sm font-medium mt-0.5">{value}</div>
+      </div>
+      <div className="relative w-16 h-10 rounded-md overflow-hidden bg-black border border-white/10 flex items-center justify-center shrink-0">{preview}</div>
+    </button>
+  )
+
+  const fontId = theme.font ?? FONTS[0].id
+  const bgId = theme.backgroundEffect ?? ''
+  const nameId = theme.nameEffect ?? ''
+  const layoutId = theme.layout || 'card'
+
+  const fontOpts: PickerOption[] = FONTS.map((f) => ({ id: f.id, label: f.label, preview: <FontPreview id={f.id} /> }))
+  const bgOpts: PickerOption[] = BG_EFFECTS.map((f) => ({ id: f.id, label: f.label, preview: <BgPreview id={f.id} /> }))
+  const nameOpts: PickerOption[] = NAME_EFFECTS.map((f) => ({ id: f.id, label: f.label, preview: <NamePreview id={f.id} /> }))
+  const layoutOpts: PickerOption[] = LAYOUTS.map((f) => ({ id: f.id, label: f.label, preview: <LayoutPreview id={f.id} /> }))
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
@@ -58,28 +131,10 @@ export default function CustomizeTab() {
       </Card>
 
       <Card title="Layout">
-        <div><Label>Font Style</Label>
-          <select className={inputCls} value={theme.font ?? FONTS[0].id} onChange={(e) => setTheme({ font: e.target.value })}>
-            {FONTS.map((f) => <option key={f.id} value={f.id} className="bg-zinc-900">{f.label}</option>)}
-          </select>
-        </div>
-        <div><Label>Background Effect</Label>
-          <select className={inputCls} value={theme.backgroundEffect ?? ''} onChange={(e) => setTheme({ backgroundEffect: e.target.value, effects: e.target.value ? [e.target.value] : [] })}>
-            {BG_EFFECTS.map((f) => <option key={f.id} value={f.id} className="bg-zinc-900">{f.label}</option>)}
-          </select>
-        </div>
-        <div><Label>Name Effect</Label>
-          <select className={inputCls} value={theme.nameEffect ?? ''} onChange={(e) => setTheme({ nameEffect: e.target.value })}>
-            {NAME_EFFECTS.map((f) => <option key={f.id} value={f.id} className="bg-zinc-900">{f.label}</option>)}
-          </select>
-        </div>
-        <div><Label>Card Layout</Label>
-          <div className="flex gap-2">
-            {['card', 'wide', 'minimal'].map((l) => (
-              <button key={l} onClick={() => setTheme({ layout: l })} className={'px-3 py-1.5 rounded-md text-xs capitalize transition ' + ((theme.layout || 'card') === l ? 'bg-white text-black' : 'border border-white/15')}>{l}</button>
-            ))}
-          </div>
-        </div>
+        {settingRow('Font', labelOf(FONTS, fontId), <FontPreview id={fontId} />, () => setPicker('font'))}
+        {settingRow('Background Effect', labelOf(BG_EFFECTS, bgId), <BgPreview id={bgId} />, () => setPicker('bg'))}
+        {settingRow('Name Effect', labelOf(NAME_EFFECTS, nameId), <NamePreview id={nameId} />, () => setPicker('name'))}
+        {settingRow('Card Layout', labelOf(LAYOUTS, layoutId), <LayoutPreview id={layoutId} />, () => setPicker('layout'))}
         <Toggle label="Mono font" checked={!!theme.monospace} onChange={(v) => setTheme({ monospace: v })} />
       </Card>
 
@@ -94,6 +149,11 @@ export default function CustomizeTab() {
         <Toggle label="Volume Control" checked={theme.volumeControl !== false} onChange={(v) => setTheme({ volumeControl: v })} />
         <Toggle label="Hiện thống kê" checked={theme.showStats !== false} onChange={(v) => setTheme({ showStats: v })} />
       </Card>
+
+      {picker === 'font' && <PickerModal title="Chọn Font" options={fontOpts} value={fontId} onSelect={(id) => setTheme({ font: id })} onClose={() => setPicker(null)} />}
+      {picker === 'bg' && <PickerModal title="Hiệu ứng nền" options={bgOpts} value={bgId} onSelect={(id) => setTheme({ backgroundEffect: id, effects: id ? [id] : [] })} onClose={() => setPicker(null)} />}
+      {picker === 'name' && <PickerModal title="Hiệu ứng tên" options={nameOpts} value={nameId} onSelect={(id) => setTheme({ nameEffect: id })} onClose={() => setPicker(null)} />}
+      {picker === 'layout' && <PickerModal title="Bố cục thẻ" options={layoutOpts} value={layoutId} onSelect={(id) => setTheme({ layout: id })} onClose={() => setPicker(null)} cols={3} />}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { Profile, Theme } from '../types'
@@ -15,24 +15,27 @@ import CoupleTab from '../components/dashboard/CoupleTab'
 import TemplatesTab from '../components/dashboard/TemplatesTab'
 
 const TABS = [
-  { id: 'customize', label: 'Customize' },
-  { id: 'color', label: 'Color' },
-  { id: 'link', label: 'Link' },
-  { id: 'decoration', label: 'Decoration' },
-  { id: 'couple', label: 'Couple' },
-  { id: 'templates', label: 'Templates' },
+  { id: 'customize', label: 'Customize', icon: '✎' },
+  { id: 'color', label: 'Color', icon: '◑' },
+  { id: 'link', label: 'Link', icon: '⛓' },
+  { id: 'decoration', label: 'Decoration', icon: '✦' },
+  { id: 'couple', label: 'Couple', icon: '❤' },
+  { id: 'templates', label: 'Templates', icon: '▦' },
 ]
 
 const previewScale = { transform: 'scale(0.92)', transformOrigin: 'top center', width: '100%' }
 
 export default function Dashboard() {
   const { user, signOut } = useAuth()
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') || 'customize'
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [tab, setTab] = useState('customize')
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState('')
   const [uploading, setUploading] = useState('')
   const [share, setShare] = useState(false)
+
+  const setTab = (id: string) => { setParams({ tab: id }); setStatus('') }
 
   useEffect(() => {
     if (!user) return
@@ -103,45 +106,57 @@ export default function Dashboard() {
 
         <div className="max-w-6xl mx-auto px-6 py-6 grid lg:grid-cols-[1fr_340px] gap-6">
           <div className="flex flex-col gap-5">
-            <div className="flex items-center gap-2 border border-white/10 rounded-md px-4 py-3">
+            <div className="flex items-center gap-3 border border-white/10 rounded-xl px-4 py-2.5">
               <span className="text-sm text-zinc-500">web.com/</span>
               <span className="text-sm flex-1 font-medium">{p.username}</span>
+              <label className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
+                <input type="checkbox" checked={p.is_public} onChange={(e) => editor.update({ is_public: e.target.checked })} /> Công khai
+              </label>
             </div>
 
-            <div className="flex gap-1 border-b border-white/10 overflow-x-auto">
+            <div className="flex gap-1.5 flex-wrap">
               {TABS.map((t) => (
-                <button key={t.id} onClick={() => setTab(t.id)} className={'px-4 py-2 text-sm whitespace-nowrap border-b-2 -mb-px transition ' + (tab === t.id ? 'border-white text-white' : 'border-transparent text-zinc-500 hover:text-white')}>{t.label}</button>
+                <button key={t.id} onClick={() => setTab(t.id)} className={'flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition ' + (tab === t.id ? 'bg-white text-black' : 'border border-white/15 text-zinc-400 hover:text-white hover:border-white/40')}><span>{t.icon}</span>{t.label}</button>
               ))}
             </div>
 
-            {tab === 'customize' && <CustomizeTab />}
-            {tab === 'color' && <ColorTab />}
-            {tab === 'link' && <LinksTab />}
-            {tab === 'decoration' && <DecorationTab />}
-            {tab === 'couple' && <CoupleTab />}
-            {tab === 'templates' && <TemplatesTab />}
-
-            <label className="flex items-center gap-2 text-sm border border-white/10 rounded-md px-4 py-3">
-              <input type="checkbox" checked={p.is_public} onChange={(e) => editor.update({ is_public: e.target.checked })} /> Trang công khai
-            </label>
-
-            <div className="flex items-center gap-3 sticky bottom-4">
-              <button onClick={save} disabled={saving} className="px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-zinc-200 disabled:opacity-50 transition">{saving ? 'Đang lưu...' : 'Lưu thay đổi'}</button>
-              {status && <span className="text-sm text-zinc-400">{status}</span>}
+            <div key={tab} className="tab-in">
+              {tab === 'customize' && <CustomizeTab />}
+              {tab === 'color' && <ColorTab />}
+              {tab === 'link' && <LinksTab />}
+              {tab === 'decoration' && <DecorationTab />}
+              {tab === 'couple' && <CoupleTab />}
+              {tab === 'templates' && <TemplatesTab />}
             </div>
           </div>
 
           <div className="hidden lg:block">
             <div className="sticky top-20">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500 mb-3">Live preview</div>
-              <div className="border border-white/10 rounded-lg bg-black overflow-hidden p-6 flex justify-center min-h-[420px]">
-                <div style={previewScale}>
-                  <BioCard profile={p} preview />
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Live preview</div>
+                <Link to={'/' + p.username} target="_blank" className="text-[11px] text-zinc-400 hover:text-white transition">Mở trang thật ↗</Link>
+              </div>
+              <div className="border border-white/10 rounded-xl bg-black overflow-hidden">
+                <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/10">
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                </div>
+                <div className="p-6 flex justify-center min-h-[420px]">
+                  <div style={previewScale}>
+                    <BioCard profile={p} preview />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <button onClick={save} disabled={saving} className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-white text-black font-medium pl-5 pr-6 py-3.5 shadow-lg shadow-black/40 fab-pop hover:scale-105 active:scale-95 transition disabled:opacity-60">
+          <span className={saving ? 'spin inline-block' : 'inline-block'}>{saving ? '◌' : '💾'}</span>
+          {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+        </button>
+        {status && <div className="fixed bottom-20 right-6 z-40 text-sm bg-zinc-900 border border-white/15 rounded-lg px-4 py-2 fade-up">{status}</div>}
 
         {share && <ShareModal url={profileUrl} accent={p.theme?.accent || '#ffffff'} onClose={() => setShare(false)} />}
       </div>
