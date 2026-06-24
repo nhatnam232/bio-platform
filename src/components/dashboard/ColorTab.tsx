@@ -13,7 +13,7 @@ export default function ColorTab() {
       <div className="flex items-center justify-between">
         <span className="text-sm text-zinc-300">{label}</span>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-zinc-500">{val}</span>
+          <span className="text-xs text-zinc-500">{val}</span>
           <input type="color" value={val} onChange={(e) => setColors({ [key]: e.target.value })} className="w-8 h-8 bg-transparent cursor-pointer rounded" />
         </div>
       </div>

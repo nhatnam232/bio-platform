@@ -1,8 +1,12 @@
-// Khung avatar động lấy trực tiếp từ kho preset chính thức của Discord (APNG động).
 export type Decoration = { id: string; label: string; url: string }
 
 const BASE = 'https://cdn.discordapp.com/avatar-decoration-presets/'
-const D = (hash: string, label: string): Decoration => ({ id: hash, label, url: BASE + hash + '.png?size=240&passthrough=true' })
+
+const D = (hash: string, label: string): Decoration => ({
+  id: hash,
+  label,
+  url: BASE + hash + '.png?size=240&passthrough=true',
+})
 
 export const DECORATIONS: Decoration[] = [
   D('a_0c0eeb351ae2cf48c6e1eee2cae49d40', 'Rainbow'),
@@ -23,4 +27,6 @@ export const DECORATIONS: Decoration[] = [
   D('a_3f29e6edfe1cff43736f644cf1d01278', 'Candlelight'),
   D('a_4c9f2ec29c05755456dbce45d8190ed4', 'Treasure'),
   D('a_4cd9ae5a8d103c219eacd3674d7730cd', 'Butterflies'),
-  D('a_5b1319abfc9f
+  D('a_5b1319abfc9f928479b68a73635f591d', 'Bubble Tea'),
+  D('a_5e8abacc7a7454d6b08b5cc84cac1d80', 'Witch Hat'),
+]

@@ -18,8 +18,10 @@ export default function NameText({
     effect === 'glow' ? 'fx-glow' :
     effect === 'rainbow' ? 'fx-rainbow' :
     effect === 'gradient' ? 'fx-gradient' :
-    effect === 'shake' ? 'fx-shake' : ''
-  const glowCls = glow && effect !== 'glow' ? 'fx-glow' : ''
+    effect === 'shake' ? 'fx-shake' :
+    effect === 'neon' ? 'fx-neon' :
+    effect === 'glitch' ? 'fx-glitch' : ''
+  const glowCls = glow && effect !== 'glow' && effect !== 'neon' ? 'fx-glow' : ''
   if (effect === 'typing') {
     return <span className={className} style={style}><TypingText text={text} /></span>
   }
