@@ -6,6 +6,7 @@ import Frame from './Frame'
 import DiscordPresence from './DiscordPresence'
 import NameText from './NameText'
 import Avatar from './Avatar'
+import SocialIcon from './SocialIcon'
 
 function renderDescription(text: string, linkColor: string): ReactNode[] {
   const out: ReactNode[] = []
@@ -16,7 +17,7 @@ function renderDescription(text: string, linkColor: string): ReactNode[] {
   const ls = { color: linkColor }
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) out.push(<span key={k++}>{text.slice(last, m.index)}</span>)
-    out.push(<a key={k++} href={m[2]} target="_blank" rel="noreferrer" className="underline hover:opacity-80" style={ls}>{m[1]}</a>)
+    out.push(<a key={k++} href={m[2]} target="_blank" rel="noreferrer" className="underline font-semibold hover:opacity-80" style={ls}>{m[1]}</a>)
     last = re.lastIndex
   }
   if (last < text.length) out.push(<span key={k++}>{text.slice(last)}</span>)
@@ -51,14 +52,15 @@ export default function BioCard({
   }
   const nameColor = colors.displayName || '#ffffff'
   const descColor = colors.description || '#d4d4d8'
-  const iconColor = theme.iconSingleColor ? (colors.icon || accent) : undefined
+  const iconColor = theme.iconSingleColor ? (colors.icon || accent) : accent
   const atStyle = { color: accent }
   const descStyle = { color: descColor }
-  const arrowStyle = { color: iconColor || accent }
+  const arrowStyle = { color: iconColor }
 
   const couple = theme.couple
   const daysLove = couple?.startTime ? Math.max(0, Math.floor((Date.now() - new Date(couple.startTime).getTime()) / 86400000)) : 0
   const coupleMsg = (couple?.message || '').replace('$[day]', String(daysLove)).replace('${day}', String(daysLove))
+  const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }) : ''
 
   const toggleLike = () => {
     if (preview) return
@@ -71,51 +73,51 @@ export default function BioCard({
 
   const content = (
     <>
-      <Avatar src={profile.avatar_url} alt={profile.username} decorationUrl={theme.avatarDecoration?.url} hue={theme.avatarDecoration?.hue ?? 0} accent={accent} />
+      <Avatar src={profile.avatar_url} alt={profile.username} decorationUrl={theme.avatarDecoration?.url} hue={theme.avatarDecoration?.hue ?? 0} accent={accent} size={104} />
 
       <div>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="text-3xl sm:text-4xl font-bold leading-tight">
           <NameText text={profile.display_name || profile.username} effect={theme.nameEffect} color={nameColor} glow={theme.glowName} />
         </h1>
-        <p className={'text-sm mt-0.5 ' + (mono ? 'font-mono' : '')} style={atStyle}>@{profile.username}</p>
-        {theme.location && <p className="text-xs mt-1" style={descStyle}>📍 {theme.location}</p>}
+        <p className={'text-base mt-1 font-medium ' + (mono ? 'font-mono' : '')} style={atStyle}>@{profile.username}</p>
+        {theme.location && <p className="text-sm mt-1.5 flex items-center justify-center gap-1.5" style={descStyle}><SocialIcon id="globe" size={14} /> {theme.location}</p>}
       </div>
 
-      {profile.bio && <p className="whitespace-pre-line leading-relaxed text-sm" style={descStyle}>{renderDescription(profile.bio, accent)}</p>}
+      {profile.bio && <p className="whitespace-pre-line leading-relaxed text-[15px]" style={descStyle}>{renderDescription(profile.bio, accent)}</p>}
 
       {badges.length > 0 && (
         <div className="flex flex-wrap justify-center gap-2">
           {badges.map((b, i) => {
             const bStyle = { borderColor: accent + '55', color: accent }
-            return <span key={i} className="text-[11px] px-2 py-1 rounded-full border" style={bStyle}>{b}</span>
+            return <span key={i} className="text-xs font-semibold px-2.5 py-1 rounded-full border" style={bStyle}>{b}</span>
           })}
         </div>
       )}
 
       {couple?.enabled && (
-        <div className="w-full flex items-center justify-center gap-4 py-2">
-          <span className="text-sm font-medium">{profile.display_name || profile.username}</span>
+        <div className="w-full flex items-center justify-center gap-4 py-1">
+          <span className="text-sm font-semibold">{profile.display_name || profile.username}</span>
           <span className="text-xl">{couple.heartIcon || '❤️'}</span>
-          <span className="text-sm font-medium">{couple.partner || 'Partner'}</span>
+          <span className="text-sm font-semibold">{couple.partner || 'Partner'}</span>
         </div>
       )}
       {couple?.enabled && coupleMsg && <p className="text-xs -mt-2" style={descStyle}>{coupleMsg}</p>}
 
       {profile.discord_id && theme.discordPresence !== false && !preview && <DiscordPresence discordId={profile.discord_id} />}
 
-      <div className="flex flex-col gap-2.5 w-full mt-1">
+      <div className="flex flex-col gap-3 w-full mt-1">
         {links.map((link, i) => {
           const plat = link.platform || detectSocial(link.url || '')
+          const showEmoji = plat === 'globe' && !!link.icon
           const lStyle = { borderColor: accent + '33' }
-          const onEnter = (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.borderColor = accent }
-          const onLeave = (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.borderColor = accent + '33' }
-          const iconStyle = { color: iconColor || undefined }
-          const cls = 'group flex items-center gap-3 border rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5'
+          const onEnter = (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.backgroundColor = accent + '14' }
+          const onLeave = (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.borderColor = accent + '33'; e.currentTarget.style.backgroundColor = 'transparent' }
+          const cls = 'group flex items-center gap-3 border rounded-lg px-4 py-3.5 text-base font-semibold transition-all duration-200 hover:-translate-y-0.5'
           const inner = (
             <>
-              <span className="text-base" style={iconStyle}>{link.icon || '🔗'}</span>
+              <span className="shrink-0 flex items-center justify-center w-6" style={arrowStyle}>{showEmoji ? <span className="text-lg">{link.icon}</span> : <SocialIcon id={plat} size={20} color={iconColor} />}</span>
               <span className="flex-1 text-left truncate">{link.label || link.url}</span>
-              {plat && plat !== 'globe' && <span className="text-[10px] uppercase tracking-wider text-zinc-500">{plat}</span>}
+              {plat && plat !== 'globe' && <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">{plat}</span>}
               {link.mode !== 'text' && <span style={arrowStyle}>↗</span>}
             </>
           )
@@ -126,24 +128,29 @@ export default function BioCard({
         })}
       </div>
 
-      <div className="flex items-center gap-4 mt-1">
+      <div className="flex items-center gap-4">
         {theme.likeSystem && (
-          <button onClick={toggleLike} className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition">
+          <button onClick={toggleLike} className="flex items-center gap-1.5 text-sm font-medium text-zinc-300 hover:text-white transition">
             <span className={liked ? 'heart-pop' : ''}>{liked ? '❤️' : '🤍'}</span>
             <span>{likes}</span>
           </button>
         )}
         {onShare && (
-          <button onClick={onShare} className="text-[11px] text-zinc-500 hover:text-white transition border border-white/10 rounded-md px-3 py-1">⤴ share</button>
+          <button onClick={onShare} className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-white transition border border-white/10 rounded-md px-3 py-1.5">⤴ Chia sẻ</button>
         )}
       </div>
 
-      {theme.showStats !== false && (
-        <div className="flex items-center gap-4 text-[11px] text-zinc-500 mt-1">
-          <span>◷ {profile.view_count} views</span>
-          <span>⛓ {links.length} links</span>
-        </div>
-      )}
+      <div className="w-full pt-4 mt-1 border-t border-white/10 flex flex-col items-center gap-2">
+        {theme.showStats !== false && (
+          <div className="flex items-center gap-3 text-xs font-medium" style={descStyle}>
+            <span>{profile.view_count} lượt xem</span>
+            <span className="opacity-40">·</span>
+            <span>{links.length} liên kết</span>
+            {memberSince && <><span className="opacity-40">·</span><span>từ {memberSince}</span></>}
+          </div>
+        )}
+        <div className="text-[10px] uppercase tracking-[0.3em] text-zinc-600 font-semibold">made with ▲ bio</div>
+      </div>
     </>
   )
 

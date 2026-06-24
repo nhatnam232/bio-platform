@@ -47,26 +47,26 @@ export default function Register() {
     navigate('/dashboard')
   }
 
-  const field = 'w-full px-3 py-2.5 bg-white/5 border border-white/10 text-sm focus:border-white/30 focus:outline-none placeholder:text-zinc-600 transition'
+  const field = 'w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-md text-[15px] focus:border-white/30 focus:outline-none placeholder:text-zinc-600 transition'
 
   return (
     <div className="relative min-h-screen text-white flex items-center justify-center p-6">
       <BackgroundFX accent="#ffffff" />
-      <Frame accent="#ffffff" className="relative z-10 w-full max-w-sm p-8 fade-up">
+      <Frame accent="#ffffff" className="relative z-10 w-full max-w-sm p-8 fade-up rounded-xl">
         <form onSubmit={handleRegister} className="flex flex-col gap-4">
           <div>
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500">create account</div>
-            <h1 className="text-2xl font-bold mt-1">Đăng ký</h1>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-500">create account</div>
+            <h1 className="text-3xl font-bold mt-1">Đăng ký</h1>
           </div>
-          {error && <p className="text-red-400 text-sm border border-red-500/30 bg-red-500/10 px-3 py-2">{error}</p>}
-          <div className="flex items-center bg-white/5 border border-white/10 px-3">
-            <span className="text-zinc-500 text-sm font-mono">web.com/</span>
-            <input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required className="flex-1 py-2.5 px-1 bg-transparent outline-none text-sm" />
+          {error && <p className="text-red-400 text-sm border border-red-500/30 bg-red-500/10 rounded-md px-3 py-2">{error}</p>}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-md px-3">
+            <span className="text-zinc-500 text-sm font-medium">web.com/</span>
+            <input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required className="flex-1 py-2.5 px-1 bg-transparent outline-none text-[15px]" />
           </div>
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={field} />
           <input type="password" placeholder="Mật khẩu (≥6 ký tự)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={field} />
-          <button type="submit" disabled={loading} className="w-full py-2.5 bg-white text-black font-medium hover:bg-zinc-200 disabled:opacity-50 transition">{loading ? '...' : 'Tạo tài khoản'}</button>
-          <p className="text-sm text-zinc-500 text-center">Đã có tài khoản? <Link to="/login" className="text-white hover:underline">Đăng nhập</Link></p>
+          <button type="submit" disabled={loading} className="w-full py-2.5 bg-white text-black font-semibold rounded-md hover:bg-zinc-200 disabled:opacity-50 transition">{loading ? '...' : 'Tạo tài khoản'}</button>
+          <p className="text-sm text-zinc-500 text-center">Đã có tài khoản? <Link to="/login" className="text-white font-medium hover:underline">Đăng nhập</Link></p>
         </form>
       </Frame>
     </div>

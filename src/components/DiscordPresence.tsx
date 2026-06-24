@@ -34,14 +34,14 @@ export default function DiscordPresence({ discordId }: { discordId: string }) {
   const dotStyle = { backgroundColor: statusColor[data.discord_status] }
 
   return (
-    <div className="w-full border border-white/10 bg-white/[0.03] px-3 py-2.5 flex items-center gap-3 text-left">
+    <div className="w-full border border-white/10 bg-white/[0.03] rounded-lg px-3 py-2.5 flex items-center gap-3 text-left">
       <div className="relative">
         <img src={avatar} alt="" className="w-9 h-9 rounded-md" />
         <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-black" style={dotStyle} />
       </div>
       <div className="min-w-0">
-        <div className="text-sm font-medium truncate">{u.global_name || u.username}</div>
-        <div className="text-xs text-zinc-500 truncate font-mono">{game ? '▸ ' + game.name : statusLabel[data.discord_status]}</div>
+        <div className="text-sm font-semibold truncate">{u.global_name || u.username}</div>
+        <div className="text-xs text-zinc-400 truncate">{game ? '▸ ' + game.name : statusLabel[data.discord_status]}</div>
       </div>
     </div>
   )
