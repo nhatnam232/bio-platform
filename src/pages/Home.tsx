@@ -42,4 +42,16 @@ export default function Home() {
       </main>
 
       <section className="relative z-10 max-w-4xl mx-auto px-6 pb-28 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {FEATUR
+        {FEATURES.map((f, i) => (
+          <Frame key={i} accent="#ffffff" className="p-5 fade-up">
+            <div className="text-sm font-mono text-zinc-500 mb-2">0{i + 1}</div>
+            <div className="font-semibold mb-1">{f.t}</div>
+            <div className="text-sm text-zinc-400">{f.d}</div>
+          </Frame>
+        ))}
+      </section>
+
+      <footer className="relative z-10 border-t border-white/10 px-6 py-6 text-center text-xs text-zinc-500 font-mono">built with react · vite · supabase</footer>
+    </div>
+  )
+}

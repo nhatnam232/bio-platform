@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import BackgroundFX from '../components/BackgroundFX'
+import Frame from '../components/Frame'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -19,41 +21,24 @@ export default function Login() {
     else navigate('/dashboard')
   }
 
+  const field = 'w-full px-3 py-2.5 bg-white/5 border border-white/10 text-sm focus:border-white/30 focus:outline-none placeholder:text-zinc-600 transition'
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-6">
-      <form onSubmit={handleLogin} className="w-full max-w-sm bg-gray-900 p-8 rounded-2xl flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">Đăng nhập</h1>
-        {error && <p className="text-red-400 text-sm">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="px-4 py-3 rounded-lg bg-gray-800 outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <input
-          type="password"
-          placeholder="Mật khẩu"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="px-4 py-3 rounded-lg bg-gray-800 outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg font-medium disabled:opacity-50"
-        >
-          {loading ? 'Đang xử lý...' : 'Đăng nhập'}
-        </button>
-        <p className="text-sm text-gray-400 text-center">
-          Chưa có tài khoản?{' '}
-          <Link to="/register" className="text-purple-400 hover:underline">
-            Đăng ký
-          </Link>
-        </p>
-      </form>
+    <div className="relative min-h-screen text-white flex items-center justify-center p-6">
+      <BackgroundFX accent="#ffffff" />
+      <Frame accent="#ffffff" className="relative z-10 w-full max-w-sm p-8 fade-up">
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500">welcome back</div>
+            <h1 className="text-2xl font-bold mt-1">Đăng nhập</h1>
+          </div>
+          {error && <p className="text-red-400 text-sm border border-red-500/30 bg-red-500/10 px-3 py-2">{error}</p>}
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={field} />
+          <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} required className={field} />
+          <button type="submit" disabled={loading} className="w-full py-2.5 bg-white text-black font-medium hover:bg-zinc-200 disabled:opacity-50 transition">{loading ? '...' : 'Đăng nhập'}</button>
+          <p className="text-sm text-zinc-500 text-center">Chưa có tài khoản? <Link to="/register" className="text-white hover:underline">Đăng ký</Link></p>
+        </form>
+      </Frame>
     </div>
   )
 }
