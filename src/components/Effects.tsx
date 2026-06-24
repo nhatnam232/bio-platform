@@ -18,7 +18,7 @@ export default function Effects({ effects = [], accent = '#ffffff', cursorUrl }:
 
   useEffect(() => {
     const set = new Set(effects)
-    const enabled = ['snow', 'rain', 'particles', 'stars', 'fireflies', 'matrix'].filter((e) => set.has(e))
+    const enabled = ['snow', 'rain', 'particles', 'stars', 'fireflies', 'matrix', 'bubbles', 'hearts'].filter((e) => set.has(e))
     const canvas = canvasRef.current
     if (!canvas || enabled.length === 0) return
     const ctx = canvas.getContext('2d')
@@ -37,6 +37,8 @@ export default function Effects({ effects = [], accent = '#ffffff', cursorUrl }:
     if (set.has('particles')) layers.particles = make(70, () => ({ x: rnd(0, w), y: rnd(0, h), r: rnd(1, 3), sx: rnd(-0.3, 0.3), sy: rnd(0.2, 0.9), phase: 0, speed: 0 }))
     if (set.has('stars')) layers.stars = make(110, () => ({ x: rnd(0, w), y: rnd(0, h), r: rnd(0.5, 1.8), sx: 0, sy: 0, phase: rnd(0, 6.28), speed: rnd(0.01, 0.05) }))
     if (set.has('fireflies')) layers.fireflies = make(45, () => ({ x: rnd(0, w), y: rnd(0, h), r: rnd(1, 2.6), sx: rnd(-0.4, 0.4), sy: rnd(-0.4, 0.4), phase: rnd(0, 6.28), speed: rnd(0.02, 0.06) }))
+    if (set.has('bubbles')) layers.bubbles = make(40, () => ({ x: rnd(0, w), y: rnd(0, h), r: rnd(4, 16), sx: rnd(-0.3, 0.3), sy: rnd(0.4, 1.2), phase: rnd(0, 6.28), speed: rnd(0.01, 0.04) }))
+    if (set.has('hearts')) layers.hearts = make(28, () => ({ x: rnd(0, w), y: rnd(0, h), r: rnd(10, 22), sx: rnd(-0.3, 0.3), sy: rnd(0.5, 1.3), phase: rnd(0, 6.28), speed: rnd(0.01, 0.04) }))
     if (set.has('matrix')) {
       const cols = Math.max(20, Math.floor(w / 16))
       layers.matrix = make(cols, () => ({ x: 0, y: rnd(-h, 0), r: 14, sx: 0, sy: rnd(4, 9), phase: 0, speed: 0, ch: MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)] }))
@@ -89,6 +91,25 @@ export default function Effects({ effects = [], accent = '#ffffff', cursorUrl }:
         if (Math.random() < 0.02) { pt.sx = rnd(-0.4, 0.4); pt.sy = rnd(-0.4, 0.4) }
         if (pt.x > w) pt.x = 0; if (pt.x < 0) pt.x = w
         if (pt.y > h) pt.y = 0; if (pt.y < 0) pt.y = h
+      }
+
+      if (layers.bubbles) {
+        ctx.strokeStyle = accent; ctx.lineWidth = 1.4
+        for (const pt of layers.bubbles) {
+          ctx.globalAlpha = 0.25 + 0.35 * Math.abs(Math.sin(pt.phase + t * pt.speed))
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2); ctx.stroke()
+          pt.x += pt.sx + Math.sin((t + pt.y) * 0.02) * 0.4; pt.y -= pt.sy
+          if (pt.y < -25) { pt.y = h + 25; pt.x = rnd(0, w) }
+        }
+      }
+
+      if (layers.hearts) for (const pt of layers.hearts) {
+        ctx.globalAlpha = 0.4 + 0.4 * Math.abs(Math.sin(pt.phase + t * pt.speed))
+        ctx.fillStyle = accent
+        ctx.font = pt.r + 'px serif'
+        ctx.fillText('❤', pt.x, pt.y)
+        pt.x += pt.sx + Math.sin((t + pt.y) * 0.02) * 0.5; pt.y -= pt.sy
+        if (pt.y < -25) { pt.y = h + 25; pt.x = rnd(0, w) }
       }
 
       if (layers.matrix) {

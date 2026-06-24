@@ -77,6 +77,20 @@ h1, h2, h3, h4 {
 @keyframes heartPop { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
 .heart-pop { animation: heartPop 0.35s ease; }
 
+/* ===== Hiệu ứng mới ===== */
+@keyframes neonPulse { 0%, 100% { text-shadow: 0 0 4px currentColor, 0 0 11px currentColor, 0 0 22px currentColor; } 50% { text-shadow: 0 0 8px currentColor, 0 0 20px currentColor, 0 0 38px currentColor; } }
+.fx-neon { animation: neonPulse 1.8s ease-in-out infinite; }
+@keyframes glitchJit { 0%, 100% { text-shadow: 2px 0 #ff003c, -2px 0 #00e1ff; transform: translate(0, 0); } 25% { text-shadow: -2px 0 #ff003c, 2px 0 #00e1ff; transform: translate(1px, -1px); } 50% { text-shadow: 2px 0 #ff003c, -2px 0 #00e1ff; transform: translate(-1px, 1px); } 75% { text-shadow: -2px 0 #ff003c, 2px 0 #00e1ff; transform: translate(1px, 1px); } }
+.fx-glitch { display: inline-block; animation: glitchJit 0.45s steps(2) infinite; }
+@keyframes fall { 0% { transform: translateY(-130%); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(130%); opacity: 0; } }
+.fx-fall { animation: fall linear infinite; }
+@keyframes tabIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.tab-in { animation: tabIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes fabPop { from { opacity: 0; transform: scale(0.6) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.fab-pop { animation: fabPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.7s linear infinite; }
+
 /* ===== Thanh cuộn ===== */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); }
