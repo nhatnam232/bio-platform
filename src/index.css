@@ -24,6 +24,16 @@ h1, h2, h3, h4 {
   letter-spacing: -0.015em;
 }
 
+/* ===== Font mềm / dễ đọc cho dashboard ===== */
+.font-soft {
+  font-family: 'Nunito', 'Poppins', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0;
+}
+.font-soft h1, .font-soft h2, .font-soft h3, .font-soft h4 {
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
 /* ===== Lưới nền ===== */
 .grid-bg {
   background-color: #000;
@@ -91,7 +101,7 @@ h1, h2, h3, h4 {
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.7s linear infinite; }
 
-/* ===== Thanh cuộn ===== */
+/* ===== Thanh cuốn ===== */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }

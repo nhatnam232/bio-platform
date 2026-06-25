@@ -53,7 +53,7 @@ export default function Dashboard() {
   const profileUrl = useMemo(() => (profile ? window.location.origin + '/' + profile.username : ''), [profile])
 
   if (!profile) {
-    return <div className="min-h-screen flex items-center justify-center bg-black text-zinc-500 text-sm">loading profile…</div>
+    return <div className="min-h-screen font-soft flex items-center justify-center bg-zinc-900 text-zinc-500 text-sm">loading profile…</div>
   }
   const p = profile
 
@@ -104,8 +104,8 @@ export default function Dashboard() {
 
   return (
     <EditorCtx.Provider value={editor}>
-      <div className="min-h-screen bg-black text-white selection:bg-white/20">
-        <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/80 backdrop-blur">
+      <div className="min-h-screen font-soft bg-zinc-900 text-white selection:bg-white/20">
+        <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur">
           <div className="text-sm font-bold tracking-wide flex items-center gap-2">
             <div className="w-6 h-6 bg-white text-black flex items-center justify-center rounded-md text-xs">▲</div>
             <span>bio<span className="text-zinc-500 font-medium">/dashboard</span></span>
@@ -148,7 +148,7 @@ export default function Dashboard() {
               </label>
             </div>
 
-            <div key={tab} className="tab-in border border-white/10 bg-[#0a0a0a] rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div key={tab} className="tab-in border border-white/10 bg-zinc-800/50 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
               {tab === 'overview' && <OverviewTab />}
               {tab === 'customize' && <CustomizeTab />}
