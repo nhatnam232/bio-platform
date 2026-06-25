@@ -54,6 +54,19 @@ create table if not exists profile_views (
 create index if not exists profile_views_profile_day_idx
   on profile_views (profile_id, day);
 
+-- DEDUP LƯỢT XEM (25/06 - REV): mỗi khách chỉ tính 1 lượt / profile / ngày
+alter table profile_views add column if not exists visitor_key text not null default 'anon';
+
+-- Gom dữ liệu trùng cũ trước khi tạo unique index
+delete from profile_views a using profile_views b
+  where a.ctid < b.ctid
+    and a.profile_id = b.profile_id
+    and a.day = b.day
+    and a.visitor_key = b.visitor_key;
+
+create unique index if not exists profile_views_dedup_idx
+  on profile_views (profile_id, day, visitor_key);
+
 alter table profile_views enable row level security;
 
 -- Chỉ chủ sở hữu mới đọc được log lượt xem của mình
@@ -62,22 +75,36 @@ create policy "owner read views" on profile_views
   for select using (auth.uid() = profile_id);
 
 -- Hàm tăng lượt xem (security definer để người xem public cũng tăng được)
--- vừa cộng tổng view_count, vừa ghi 1 dòng log theo ngày
-create or replace function increment_views(profile_username text)
+-- DEDUP theo (profile, ngày, khách) + KHÔNG đếm khi chính chủ xem trang của mình
+create or replace function increment_views(profile_username text, p_visitor_key text default null)
 returns void
 language plpgsql
 security definer
 as $$
 declare
   pid uuid;
+  rc int;
+  vkey text := coalesce(nullif(p_visitor_key, ''), 'anon');
 begin
-  update profiles
-    set view_count = view_count + 1
-    where username = profile_username
-    returning id into pid;
+  select id into pid from profiles where username = profile_username;
+  if pid is null then
+    return;
+  end if;
 
-  if pid is not null then
-    insert into profile_views (profile_id) values (pid);
+  -- Không tính khi chính chủ xem trang của mình
+  if auth.uid() = pid then
+    return;
+  end if;
+
+  -- Dedup: chỉ ghi 1 dòng / profile / ngày / khách
+  insert into profile_views (profile_id, visitor_key)
+    values (pid, vkey)
+    on conflict (profile_id, day, visitor_key) do nothing;
+  get diagnostics rc = row_count;
+
+  -- Chỉ cộng tổng view_count khi thực sự là lượt xem mới trong ngày
+  if rc > 0 then
+    update profiles set view_count = view_count + 1 where id = pid;
   end if;
 end;
 $$;
@@ -94,6 +121,65 @@ as $$
     and pv.day >= current_date - (days - 1)
   group by pv.day
   order by pv.day;
+$$;
+
+-- ============================================
+-- LIKE THẬT (25/06 - REV): lưu DB, đếm chung, dedup theo khách
+-- ============================================
+create table if not exists profile_likes (
+  profile_id  uuid references profiles(id) on delete cascade,
+  visitor_key text not null,
+  created_at  timestamptz default now(),
+  primary key (profile_id, visitor_key)
+);
+
+alter table profile_likes enable row level security;
+
+-- Ai cũng đọc được (đếm like công khai)
+drop policy if exists "read likes" on profile_likes;
+create policy "read likes" on profile_likes
+  for select using (true);
+
+-- Lấy số like + khách hiện tại đã like chưa
+create or replace function get_likes(p_profile_id uuid, p_visitor_key text)
+returns table(like_count bigint, liked boolean)
+language sql
+security definer
+as $$
+  select
+    (select count(*) from profile_likes where profile_id = p_profile_id)::bigint,
+    exists(
+      select 1 from profile_likes
+      where profile_id = p_profile_id and visitor_key = p_visitor_key
+    );
+$$;
+
+-- Bật/tắt like cho 1 profile theo khách, trả về trạng thái mới
+create or replace function toggle_like(p_profile_id uuid, p_visitor_key text)
+returns table(like_count bigint, liked boolean)
+language plpgsql
+security definer
+as $$
+declare
+  is_liked boolean;
+begin
+  if exists(
+    select 1 from profile_likes
+    where profile_id = p_profile_id and visitor_key = p_visitor_key
+  ) then
+    delete from profile_likes
+      where profile_id = p_profile_id and visitor_key = p_visitor_key;
+    is_liked := false;
+  else
+    insert into profile_likes (profile_id, visitor_key)
+      values (p_profile_id, p_visitor_key)
+      on conflict (profile_id, visitor_key) do nothing;
+    is_liked := true;
+  end if;
+
+  return query
+    select (select count(*) from profile_likes where profile_id = p_profile_id)::bigint, is_liked;
+end;
 $$;
 
 -- ============================================
@@ -117,7 +203,7 @@ begin
     where bucket_id = 'assets'
       and (storage.foldername(name))[1] = uid::text;
 
-  -- Xoá auth user → cascade xoá profile + profile_views
+  -- Xoá auth user → cascade xoá profile + profile_views + profile_likes
   delete from auth.users where id = uid;
 end;
 $$;

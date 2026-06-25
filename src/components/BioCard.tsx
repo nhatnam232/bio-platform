@@ -1,7 +1,9 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Profile, Theme } from '../types'
 import { detectSocial } from '../lib/social'
 import { hexToRgba } from '../lib/color'
+import { downloadVCard } from '../lib/vcard'
+import { getLikes, toggleLike as toggleLikeApi } from '../lib/likes'
 import Frame from './Frame'
 import DiscordPresence from './DiscordPresence'
 import NameText from './NameText'
@@ -10,7 +12,7 @@ import SocialIcon from './SocialIcon'
 
 function renderDescription(text: string, linkColor: string): ReactNode[] {
   const out: ReactNode[] = []
-  const re = /\[([^\]]+)\]\([^)]+\)/g
+  const re = /\[([^\]]+)\]\(([^)]+)\)/g
   let last = 0
   let m: RegExpExecArray | null
   let k = 0
@@ -63,13 +65,33 @@ export default function BioCard({
   const coupleMsg = (couple?.message || '').replace('$[day]', String(daysLove)).replace('${day}', String(daysLove))
   const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }) : ''
 
-  const toggleLike = () => {
+  const profileUrl = typeof window !== 'undefined' ? window.location.origin + '/' + profile.username : ''
+
+  useEffect(() => {
+    if (preview || !theme.likeSystem || !profile.id) return
+    getLikes(profile.id)
+      .then((r) => { setLikes(r.count); setLiked(r.liked) })
+      .catch(() => {})
+  }, [preview, theme.likeSystem, profile.id])
+
+  const toggleLike = async () => {
+    if (preview || !profile.id) return
+    const optimistic = !liked
+    setLiked(optimistic)
+    setLikes((c) => c + (optimistic ? 1 : -1))
+    try {
+      const r = await toggleLikeApi(profile.id)
+      setLikes(r.count)
+      setLiked(r.liked)
+    } catch {
+      setLiked(!optimistic)
+      setLikes((c) => c + (optimistic ? -1 : 1))
+    }
+  }
+
+  const saveContact = () => {
     if (preview) return
-    setLiked((v) => {
-      const nv = !v
-      setLikes((c) => c + (nv ? 1 : -1))
-      return nv
-    })
+    downloadVCard(profile, profileUrl)
   }
 
   const content = (
@@ -161,6 +183,9 @@ export default function BioCard({
         )}
         {onShare && (
           <button onClick={onShare} className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-white transition border border-white/10 rounded-md px-3 py-1.5">⤴ Chia sẻ</button>
+        )}
+        {profile.phone && !preview && (
+          <button onClick={saveContact} className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-white transition border border-white/10 rounded-md px-3 py-1.5" title="Lưu vào danh bạ">💾 Lưu danh bạ</button>
         )}
       </div>
 
