@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react'
 import { Profile, Theme } from '../types'
 import { detectSocial } from '../lib/social'
 import { hexToRgba } from '../lib/color'
+import { downloadVCard } from '../lib/vcard'
 import Frame from './Frame'
 import DiscordPresence from './DiscordPresence'
 import NameText from './NameText'
@@ -10,7 +11,7 @@ import SocialIcon from './SocialIcon'
 
 function renderDescription(text: string, linkColor: string): ReactNode[] {
   const out: ReactNode[] = []
-  const re = /\[([^\]]+)\]\([^)]+\)/g
+  const re = /\[([^\]]+)\]\(([^)]+)\)/g
   let last = 0
   let m: RegExpExecArray | null
   let k = 0
@@ -70,6 +71,11 @@ export default function BioCard({
       setLikes((c) => c + (nv ? 1 : -1))
       return nv
     })
+  }
+
+  const saveContact = () => {
+    const url = typeof window !== 'undefined' ? window.location.origin + '/' + profile.username : ''
+    downloadVCard(profile, url)
   }
 
   const content = (
@@ -158,6 +164,9 @@ export default function BioCard({
             <span className={liked ? 'heart-pop' : ''}>{liked ? '❤️' : '🤍'}</span>
             <span>{likes}</span>
           </button>
+        )}
+        {!preview && profile.phone && (
+          <button onClick={saveContact} className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-white transition border border-white/10 rounded-md px-3 py-1.5">📇 Lưu danh bạ</button>
         )}
         {onShare && (
           <button onClick={onShare} className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-white transition border border-white/10 rounded-md px-3 py-1.5">⤴ Chia sẻ</button>
