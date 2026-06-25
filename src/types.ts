@@ -43,6 +43,7 @@ export type Theme = {
   template?: string
   nameTyping?: boolean
   nameEffect?: string
+  textEffect?: string
   showStats?: boolean
   colors?: ThemeColors
   cardOpacity?: number
@@ -71,6 +72,50 @@ export type Background = {
   opacity?: number
 }
 
+export type WidgetType =
+  | 'text'
+  | 'image'
+  | 'link'
+  | 'button'
+  | 'music'
+  | 'video'
+  | 'embed'
+  | 'discord'
+  | 'github'
+  | 'spotify'
+  | 'youtube'
+  | 'map'
+  | 'countdown'
+  | 'divider'
+
+// Card widget tuỳ biến hiển thị trên trang bio (lưu trong cột profiles.widgets)
+export type Widget = {
+  id: string
+  type: WidgetType
+  title?: string
+  content?: string
+  url?: string
+  icon?: string
+  size?: 'sm' | 'md' | 'lg' | 'full'
+  accent?: string
+  data?: Record<string, unknown>
+}
+
+// 1 template trong chợ template (bảng templates)
+export type Template = {
+  id: string
+  owner_id: string | null
+  name: string
+  description: string | null
+  preview_url: string | null
+  tags: string[] | null
+  theme: Theme | null
+  background: Background | null
+  is_public: boolean
+  downloads: number
+  created_at: string
+}
+
 export type Profile = {
   id: string
   username: string
@@ -80,8 +125,10 @@ export type Profile = {
   background: Background | null
   music_url: string | null
   cursor_url: string | null
+  phone: string | null
   theme: Theme | null
   links: ProfileLink[] | null
+  widgets: Widget[] | null
   discord_id: string | null
   badges: string[] | null
   view_count: number

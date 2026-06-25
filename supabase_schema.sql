@@ -123,7 +123,68 @@ end;
 $$;
 
 -- ============================================
--- STORAGE: bucket 'assets' cho avatar / nhạc / nền / cursor
+-- TÍNH NĂNG MỚI (25/06): số điện thoại, card widget, chợ template
+-- ============================================
+
+-- Số điện thoại liên hệ hiển thị trên profile
+alter table profiles add column if not exists phone text;
+
+-- Card widgets: mảng widget tuỳ biến hiển thị trên trang bio
+alter table profiles add column if not exists widgets jsonb default '[]'::jsonb;
+
+-- --------------------------------------------
+-- CHỢ TEMPLATE: user tự up template để người khác dùng
+-- --------------------------------------------
+create table if not exists templates (
+  id          uuid primary key default gen_random_uuid(),
+  owner_id    uuid references auth.users(id) on delete set null,
+  name        text not null,
+  description text,
+  preview_url text,
+  tags        text[] default '{}',
+  theme       jsonb,
+  background  jsonb,
+  is_public   boolean default true,
+  downloads   int default 0,
+  created_at  timestamptz default now()
+);
+
+create index if not exists templates_public_downloads_idx
+  on templates (is_public, downloads desc);
+
+alter table templates enable row level security;
+
+-- Ai cũng xem được template công khai; chủ sở hữu xem được cả template riêng
+drop policy if exists "read public templates" on templates;
+create policy "read public templates" on templates
+  for select using (is_public = true or auth.uid() = owner_id);
+
+-- Người đã đăng nhập tự đăng template của mình
+drop policy if exists "owner insert templates" on templates;
+create policy "owner insert templates" on templates
+  for insert with check (auth.uid() = owner_id);
+
+-- Chủ sở hữu sửa template của mình
+drop policy if exists "owner update templates" on templates;
+create policy "owner update templates" on templates
+  for update using (auth.uid() = owner_id);
+
+-- Chủ sở hữu xoá template của mình
+drop policy if exists "owner delete templates" on templates;
+create policy "owner delete templates" on templates
+  for delete using (auth.uid() = owner_id);
+
+-- Tăng lượt tải khi có người áp dụng template (security definer để ai cũng tăng được)
+create or replace function use_template(template_id uuid)
+returns void
+language sql
+security definer
+as $$
+  update templates set downloads = downloads + 1 where id = template_id;
+$$;
+
+-- ============================================
+-- STORAGE: bucket 'assets' cho avatar / nhạc / nền / cursor / preview template
 -- ============================================
 insert into storage.buckets (id, name, public)
 values ('assets', 'assets', true)
