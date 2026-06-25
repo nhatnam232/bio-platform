@@ -34,25 +34,29 @@
 ----------------------------------------------------------------
  [REV -> GM/CL]  (Reviewer - review code + UI/UX; YEU CAU sua/them. AI khac lam.)
 ----------------------------------------------------------------
-[x] (25/06) REV->GM (BUG): bio markdown link [text](url) MAT href. DA SUA: regex doi thanh
-    /\[([^\]]+)\]\(([^)]+)\)/g (boc URL trong group 2), giu m[2] lam href. (ef2e80f1)
-[x] (25/06) REV->GM (FEATURE): "Luu danh ba" (vCard .vcf). DA LAM: tao src/lib/vcard.ts
-    (buildVCard 3.0 + escape , ; \\ xuong dong, noi dong \r\n; downloadVCard -> Blob text/vcard ->
-    tai <username>.vcf). BioCard them nut "Luu danh ba" o hang like/share, chi hien khi co
-    profile.phone va !preview. (ef2e80f1)
-[x] (25/06) REV->CL (FEATURE): LIKE SYSTEM that. DA LAM: bang profile_likes(profile_id, visitor_key)
-    + RPC get_likes/toggle_like (security definer, dem chung, dedup theo visitor_key) trong
-    supabase_schema.sql; src/lib/likes.ts (getVisitorKey qua localStorage); BioCard noi vao RPC
-    (useEffect load + toggle optimistic, revert khi loi) thay cho useState. (ef2e80f1)
-[x] (25/06) REV->CL (BUG): increment_views dem moi lan load. DA SUA: them cot visitor_key + unique
-    index (profile_id, day, visitor_key); increment_views(profile_username, p_visitor_key) bo dem
-    khi auth.uid()=chu trang + insert on conflict do nothing, chi +view_count khi la luot moi/ngay.
-    Profile.tsx truyen getVisitorKey(). (ef2e80f1)
-[x] (25/06) REV->GM/CL (ON DINH): src/lib/supabase.ts. DA SUA: throw Error ro rang khi thieu
-    VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY (bo console.warn vo nghia). (ef2e80f1)
+[x] (25/06) REV->GM (BUG): bio markdown link [text](url) MAT href. DA SUA + REV VERIFY OK:
+    regex /\[([^\]]+)\]\(([^)]+)\)/g, href=m[2], label=m[1]. Link trong bio bam dung dia chi. (ef2e80f1)
+[x] (25/06) REV->GM (FEATURE): "Luu danh ba" (vCard .vcf). DA LAM + REV VERIFY OK: src/lib/vcard.ts
+    (vCard 3.0, esc \\ , ; xuong dong, noi \r\n; Blob text/vcard -> tai <username>.vcf). Nut hien khi
+    co phone + !preview. (ef2e80f1) -- xem 2 nit nho ben duoi (NOTE markdown + revoke URL).
+[x] (25/06) REV->CL (FEATURE): LIKE THAT. DA LAM + REV VERIFY OK: profile_likes(profile_id,visitor_key)
+    PK + RLS; get_likes/toggle_like security definer (insert/delete chay qua RPC nen bypass RLS dung);
+    src/lib/likes.ts (visitor_key localStorage); BioCard useEffect load + toggle optimistic revert. (ef2e80f1)
+[x] (25/06) REV->CL (BUG): increment_views dedup. DA SUA + REV VERIFY OK: cot visitor_key + unique index
+    (profile_id,day,visitor_key); delete trung cu truoc khi tao index (an toan migrate); bo dem khi
+    auth.uid()=chu trang; insert on conflict do nothing, chi +view_count khi rc>0. Profile.tsx truyen key. (ef2e80f1)
+[x] (25/06) REV->GM/CL (ON DINH): supabase.ts. DA SUA + REV VERIFY OK: throw Error ro rang khi thieu
+    VITE_SUPABASE_URL/ANON_KEY (bo console.warn vo nghia). (ef2e80f1)
+[ ] (25/06) REV->GM (NIT, nho): vCard NOTE dang nhet raw markdown - vi du NOTE chua "[Discord](https://...)".
+    -> nen strip [text](url) thanh "text" truoc khi cho vao NOTE (dung lai regex o renderDescription)
+    cho danh ba sach. Khong gap, lam khi tien tay.
+[ ] (25/06) REV->GM (NIT, nho): downloadVCard goi URL.revokeObjectURL NGAY sau a.click() -> 1 so trinh
+    duyet (Safari/Firefox cu) co the huy tai file. -> boc trong setTimeout(() => revoke, 1500). Minor.
+[ ] (25/06) REV->CL (HARDENING, optional): profile_likes co policy select using(true) -> client co the
+    doc thang bang va liet ke visitor_key nguoi khac (khong phai PII nhung lo). Da co RPC get_likes
+    (security definer) roi -> co the doi policy thanh using(false), chi cho doc qua RPC. Optional.
 [ ] (25/06) REV (uu tien thap - DE SAU): trang /:username chua co OG/meta tag rieng -> share link
-    khong co preview (han che SPA). -> prerender/SSR hoac set meta dong. CHUA LAM (uu tien thap,
-    can doi giai phap SSR/prerender; lam o phien sau).
+    khong co preview (han che SPA). -> prerender/SSR hoac set meta dong. CHUA LAM (lam o phien sau).
 
 ----------------------------------------------------------------
  VA CHAM / LUU Y CHEO
@@ -62,6 +66,8 @@
   hideScroll: CSSProperties roi style={hideScroll}.
 - BAI HOC: style inline phuc tap -> luon tach thanh hang so (ngoac don), tranh ngoac nhon kep inline
   (lop cong cu hay nuot mat ngoac -> push no-op). Da tai dien o BioCard.tsx (xem THAO LUAN).
+- (25/06) REV xac nhan: BioCard.tsx ef2e80f1 da them import useEffect + dung style hang so (ls/wStyle/lStyle),
+  KHONG co ngoac nhon kep inline -> an toan voi bai hoc tren, build OK.
 - (25/06) !! User PHAI CHAY LAI supabase_schema.sql trong Supabase SQL Editor sau commit ef2e80f1:
   them cot visitor_key + dedup view, bang profile_likes, RPC get_likes/toggle_like, va
   increment_views moi (2 tham so). Khong chay -> like that + dedup view KHONG hoat dong.
@@ -71,13 +77,14 @@
 ----------------------------------------------------------------
 - Backend (CL): xong doi mat khau + xoa tai khoan + thong ke view theo ngay; cot phone, widgets,
   bang templates + RLS + RPC use_template; LIKE THAT (profile_likes + get_likes/toggle_like);
-  dedup increment_views + bo dem chu trang; guard env supabase.ts.
+  dedup increment_views + bo dem chu trang; guard env supabase.ts. REV da verify dat.
   !! CAN CHAY LAI supabase_schema.sql trong Supabase SQL Editor -> viec cua User.
 - Frontend (GM): xong 4 task FE + fix build + font/nen; fix bug bio link href; vCard "Luu danh ba";
-  noi BioCard vao RPC like that. UI san sang.
-- Reviewer (REV): da review code+UI/UX. 5/6 yeu cau DA XONG (ef2e80f1). Con 1 viec uu tien thap
-  (OG/meta SSR) de sau.
-- Commit moi nhat main: ef2e80f1.
+  noi BioCard vao RPC like that. UI san sang. REV da verify dat (con 2 nit nho khong chan).
+- Reviewer (REV): da review dot 2 (verify code that, khong chi tin mailbox). KET LUAN: PASS 5/6.
+  Them 3 nit nho (2 vCard cho GM + 1 hardening RLS cho CL) - deu optional, khong chan deploy.
+  Con 1 viec uu tien thap (OG/meta SSR) de sau.
+- Commit moi nhat main: 96cd328 (mailbox), code: ef2e80f1.
 
 ----------------------------------------------------------------
  NHAT KY BAN GIAO
@@ -92,9 +99,9 @@
 - 25/06 - GM: (Task User) Dashboard doi font Nunito mem + nen xam zinc-900/zinc-800 (d98de91).
 - 25/06 - REV: review code+UI/UX, ghi yeu cau o muc [REV -> GM/CL]. KHONG tu commit code - AI khac lam.
 - 25/06 - GM+CL: hoan thanh 5/6 yeu cau REV trong 1 dot (ef2e80f1): fix bio link href; vCard
-  "Luu danh ba" (src/lib/vcard.ts); like that (profile_likes + RPC get_likes/toggle_like +
-  src/lib/likes.ts + BioCard); dedup increment_views + bo dem chu trang (Profile.tsx truyen
-  visitor_key); guard env supabase.ts. Con OG/meta (uu tien thap) de sau.
+  "Luu danh ba"; like that + RPC; dedup increment_views; guard env supabase.
+- 25/06 - REV: review dot 2 - VERIFY code that tai ef2e80f1, KET LUAN PASS 5/6. Them 3 nit nho optional
+  (vCard NOTE strip markdown, revoke URL setTimeout, that chat RLS profile_likes). OG/meta van de sau.
 
 // Tin nhan tu User: Khi lam phai doc thu truoc (uu tien cao nhat), va cuoi trang doc thu. User se giao tiep o day nen khong xoa sau dau //
 // thu tu user: UI dashboard co vai font sac nhon -> lam lai + nen mau xam //
@@ -112,29 +119,28 @@ GM chot: DA FIX & PUSH main (1da3871) theo goi y CL. Lan push dau (a6dbe64) bi n
    bi nuot -> doi sang hang so (ngoac don) + xac minh lai file tren main. Nho xac nhan Vercel xanh de dong.
 
 ================================================================
- THAO LUAN: Review code + yeu cau feature (REV) - 25/06  [DA DONG 5/6]
+ THAO LUAN: Review code + yeu cau feature (REV) - 25/06  [DA VERIFY 5/6]
 ================================================================
-REV: da doc toan bo src + schema. Tom tat:
- - BUG can sua ngay: bio markdown link [text](url) mat href (regex thieu group cho URL) -> GM.
- - FEATURE yeu cau: "Luu danh ba" (vCard .vcf) cho trang public, thuan FE -> GM.
- - BE: like system dang gia (state local) can luu DB; increment_views can dedup -> CL.
- - On dinh: guard src/lib/supabase.ts khi thieu env -> GM/CL.
-REV chi review + yeu cau, KHONG tu commit code. Chi tiet va goi y fix nam o muc [REV -> GM/CL] o tren.
+REV (dot 1): da doc toan bo src + schema. Yeu cau: fix bio link href (GM), vCard "Luu danh ba" (GM),
+   like that + dedup view (CL), guard env supabase (GM/CL). Chi tiet o muc [REV -> GM/CL].
 
-GM+CL phan hoi (ef2e80f1): DA LAM XONG 5/6 yeu cau.
- - bio link href: regex da boc URL group 2, link trong bio bam dung dia chi. OK.
- - vCard: src/lib/vcard.ts theo dung spec REV (3.0, escape, \r\n, Blob .vcf); nut "Luu danh ba"
-   chi hien khi co phone + !preview. OK.
- - like that: profile_likes + get_likes/toggle_like (security definer, dem chung, dedup visitor_key);
-   BioCard load qua useEffect + toggle optimistic (revert khi loi). OK.
- - dedup view: visitor_key + unique index (profile,day,visitor_key); bo dem khi chu trang xem;
-   chi +view_count khi la luot moi trong ngay. Profile.tsx truyen getVisitorKey(). OK.
- - guard env: supabase.ts throw Error ro rang khi thieu URL/ANON_KEY. OK.
- - LUU Y bai hoc cu: da tach style thanh hang so (wStyle/lStyle/...) trong BioCard, tranh ngoac nhon
-   kep inline -> push lan nay an toan, khong no-op.
- CON LAI: OG/meta tag cho /:username (uu tien thap) - de phien sau khi co giai phap SSR/prerender.
- NHO User: phai chay lai supabase_schema.sql trong Supabase SQL Editor de like that + dedup view chay.
-REV review tiep dot nay khi rảnh -> ghi y kien moi o day hoac muc [REV -> GM/CL].
+GM+CL phan hoi (ef2e80f1): DA LAM XONG 5/6.
+
+REV (dot 2 - VERIFY code that, khong chi tin loi khai mailbox):
+ - bio link href: PASS. Regex boc URL group 2, href=m[2]. Dung.
+ - vCard: PASS. Dung spec 3.0, escape, \r\n, Blob .vcf, nut chi hien khi co phone + !preview.
+   2 NIT nho (khong chan): (1) NOTE dang nhet raw markdown [text](url) -> nen strip thanh text;
+   (2) revokeObjectURL goi ngay sau click -> nen boc setTimeout cho chac (Safari/FF cu).
+ - like that: PASS. profile_likes PK (profile,visitor_key); get_likes/toggle_like security definer
+   (insert/delete qua RPC bypass RLS dung); BioCard load useEffect + toggle optimistic revert chuan.
+   HARDENING optional: policy select using(true) cho doc thang bang -> co the siet thanh using(false)
+   vi da co RPC.
+ - dedup view: PASS. visitor_key + unique index (profile,day,visitor_key); delete trung cu truoc khi
+   tao index (migrate an toan); bo dem khi chu trang xem; chi +view_count khi la luot moi/ngay. Tot.
+ - guard env: PASS. throw Error ro rang, bo console.warn vo nghia.
+ - Build: an toan - BioCard da import useEffect, style tach hang so (khong ngoac nhon kep inline).
+ KET LUAN REV: APPROVED 5/6. 3 nit deu optional, khong chan deploy. Con OG/meta (uu tien thap) de sau.
+ NHO User: phai chay lai supabase_schema.sql trong Supabase SQL Editor -> like that + dedup view moi chay.
 
 ================================================================
  HET FILE - moi cap nhat hay them muc o tren va commit lai.
