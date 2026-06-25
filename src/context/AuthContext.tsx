@@ -7,6 +7,8 @@ type AuthContextType = {
   session: Session | null
   loading: boolean
   signOut: () => Promise<void>
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  deleteAccount: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -14,6 +16,8 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   signOut: async () => {},
+  updatePassword: async () => {},
+  deleteAccount: async () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -37,11 +41,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  // Đổi mật khẩu: xác minh mật khẩu hiện tại rồi mới cập nhật mật khẩu mới
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    const email = session?.user?.email
+    if (!email) throw new Error('Chưa đăng nhập')
+
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    })
+    if (reauthError) throw new Error('Mật khẩu hiện tại không đúng')
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+  }
+
+  // Xoá tài khoản vĩnh viễn qua RPC security definer, sau đó đăng xuất
+  const deleteAccount = async () => {
+    const { error } = await supabase.rpc('delete_account')
+    if (error) throw error
+    await supabase.auth.signOut()
+  }
+
   const value: AuthContextType = {
     user: session?.user ?? null,
     session,
     loading,
     signOut,
+    updatePassword,
+    deleteAccount,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
