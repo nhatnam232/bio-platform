@@ -10,7 +10,7 @@ import SocialIcon from './SocialIcon'
 
 function renderDescription(text: string, linkColor: string): ReactNode[] {
   const out: ReactNode[] = []
-  const re = /\[([^\]]+)\]\(([^)]+)\)/g
+  const re = /\\[([^\\]]+)\\]\\([^)]+\\)/g
   let last = 0
   let m: RegExpExecArray | null
   let k = 0
@@ -39,6 +39,7 @@ export default function BioCard({
   const layout = theme.layout || 'card'
   const mono = !!theme.monospace
   const links = profile.links ?? []
+  const widgets = profile.widgets ?? []
   const badges = profile.badges ?? []
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState(0)
@@ -81,9 +82,10 @@ export default function BioCard({
         </h1>
         <p className={'text-base mt-1 font-medium ' + (mono ? 'font-mono' : '')} style={atStyle}>@{profile.username}</p>
         {theme.location && <p className="text-sm mt-1.5 flex items-center justify-center gap-1.5" style={descStyle}><SocialIcon id="globe" size={14} /> {theme.location}</p>}
+        {profile.phone && <p className="text-sm mt-1.5 flex items-center justify-center gap-1.5 font-medium" style={descStyle}>📞 {profile.phone}</p>}
       </div>
 
-      {profile.bio && <p className="whitespace-pre-line leading-relaxed text-[15px]" style={descStyle}>{renderDescription(profile.bio, accent)}</p>}
+      {profile.bio && <p className={`whitespace-pre-line leading-relaxed text-[15px] ${theme.textEffect ? `fx-${theme.textEffect}` : ''}`} style={descStyle}>{renderDescription(profile.bio, accent)}</p>}
 
       {badges.length > 0 && (
         <div className="flex flex-wrap justify-center gap-2">
@@ -127,6 +129,25 @@ export default function BioCard({
           return <a key={i} href={link.url || '#'} target="_blank" rel="noreferrer" onMouseEnter={onEnter} onMouseLeave={onLeave} className={cls} style={lStyle}>{inner}</a>
         })}
       </div>
+
+      {widgets.length > 0 && (
+        <div className="w-full flex flex-col gap-4 mt-2">
+          {widgets.map(w => (
+            <div key={w.id} className="w-full rounded-xl overflow-hidden border border-white/5" style= backgroundColor: hexToRgba(colors.card || '#000000', Math.min(1, cardOpacity + 0.1)) >
+              {w.title && <div className="px-4 py-2.5 font-semibold text-sm border-b border-white/10" style={descStyle}>{w.title}</div>}
+              <div className="p-4 flex flex-col items-center justify-center text-sm" style={descStyle}>
+                {w.type === 'text' && <div className="whitespace-pre-line text-left w-full leading-relaxed">{w.content}</div>}
+                {w.type === 'image' && w.url && <img src={w.url} alt={w.title} className="w-full rounded-lg" />}
+                {w.type === 'youtube' && w.url && <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[YouTube Video: {w.url}]</div>}
+                {w.type === 'spotify' && w.url && <div className="h-20 w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[Spotify Embed: {w.url}]</div>}
+                {w.type === 'link' && w.url && <a href={w.url} target="_blank" rel="noreferrer" className="text-blue-400 underline font-medium break-all text-center">{w.url}</a>}
+                {w.type === 'map' && w.url && <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[Map: {w.url}]</div>}
+                {!['text', 'image', 'youtube', 'spotify', 'link', 'map'].includes(w.type) && <div>[{w.type} widget placeholder]</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         {theme.likeSystem && (

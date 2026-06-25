@@ -12,6 +12,7 @@ import OverviewTab from '../components/dashboard/OverviewTab'
 import CustomizeTab from '../components/dashboard/CustomizeTab'
 import ColorTab from '../components/dashboard/ColorTab'
 import LinksTab from '../components/dashboard/LinksTab'
+import WidgetsTab from '../components/dashboard/WidgetsTab'
 import DecorationTab from '../components/dashboard/DecorationTab'
 import CoupleTab from '../components/dashboard/CoupleTab'
 import TemplatesTab from '../components/dashboard/TemplatesTab'
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'customize', label: 'Customize', icon: '✎' },
   { id: 'color', label: 'Color', icon: '◑' },
   { id: 'link', label: 'Link', icon: '⛓' },
+  { id: 'widgets', label: 'Widgets', icon: '🗂' },
   { id: 'decoration', label: 'Decoration', icon: '✦' },
   { id: 'couple', label: 'Couple', icon: '❤' },
   { id: 'templates', label: 'Templates', icon: '▦' },
@@ -87,8 +89,10 @@ export default function Dashboard() {
       avatar_url: p.avatar_url,
       music_url: p.music_url,
       cursor_url: p.cursor_url,
+      phone: p.phone,
       discord_id: p.discord_id,
       links: p.links,
+      widgets: p.widgets,
       theme: p.theme,
       background: p.background,
       badges: p.badges,
@@ -150,6 +154,7 @@ export default function Dashboard() {
               {tab === 'customize' && <CustomizeTab />}
               {tab === 'color' && <ColorTab />}
               {tab === 'link' && <LinksTab />}
+              {tab === 'widgets' && <WidgetsTab />}
               {tab === 'decoration' && <DecorationTab />}
               {tab === 'couple' && <CoupleTab />}
               {tab === 'templates' && <TemplatesTab />}

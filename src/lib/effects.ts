@@ -23,8 +23,22 @@ export const NAME_EFFECTS: Option[] = [
   { id: 'glitch', label: 'Glitch' },
 ]
 
+export const TEXT_EFFECTS: Option[] = [
+  { id: '', label: 'Không' },
+  { id: 'glow', label: 'Glow' },
+  { id: 'rainbow', label: 'Rainbow' },
+  { id: 'neon', label: 'Neon' },
+  { id: 'shake', label: 'Shake' },
+]
+
 export const FONTS: Option[] = [
   { id: "'Poppins', sans-serif", label: 'Poppins' },
+  { id: "'Inter', sans-serif", label: 'Inter' },
+  { id: "'Roboto', sans-serif", label: 'Roboto' },
+  { id: "'Montserrat', sans-serif", label: 'Montserrat' },
+  { id: "'Oswald', sans-serif", label: 'Oswald' },
+  { id: "'Playfair Display', serif", label: 'Playfair Display' },
   { id: 'Georgia, serif', label: 'Serif' },
+  { id: "'Courier New', monospace", label: 'Courier Mono' },
   { id: 'system-ui, sans-serif', label: 'System' },
 ]

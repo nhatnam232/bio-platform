@@ -3,7 +3,7 @@ import { useEditor } from '../../context/EditorContext'
 import { Theme } from '../../types'
 import Toggle from '../ui/Toggle'
 import { Card, Label, inputCls } from '../ui/Field'
-import { FONTS, BG_EFFECTS, NAME_EFFECTS, Option } from '../../lib/effects'
+import { FONTS, BG_EFFECTS, NAME_EFFECTS, TEXT_EFFECTS, Option } from '../../lib/effects'
 import PickerModal, { PickerOption } from '../ui/PickerModal'
 import NameText from '../NameText'
 
@@ -87,11 +87,13 @@ export default function CustomizeTab() {
   const fontId = theme.font ?? FONTS[0].id
   const bgId = theme.backgroundEffect ?? ''
   const nameId = theme.nameEffect ?? ''
+  const textId = theme.textEffect ?? ''
   const layoutId = theme.layout || 'card'
 
   const fontOpts: PickerOption[] = FONTS.map((f) => ({ id: f.id, label: f.label, preview: <FontPreview id={f.id} /> }))
   const bgOpts: PickerOption[] = BG_EFFECTS.map((f) => ({ id: f.id, label: f.label, preview: <BgPreview id={f.id} /> }))
   const nameOpts: PickerOption[] = NAME_EFFECTS.map((f) => ({ id: f.id, label: f.label, preview: <NamePreview id={f.id} /> }))
+  const textOpts: PickerOption[] = TEXT_EFFECTS.map((f) => ({ id: f.id, label: f.label, preview: <span className={f.id ? `fx-${f.id}` : ''}>Aa</span> }))
   const layoutOpts: PickerOption[] = LAYOUTS.map((f) => ({ id: f.id, label: f.label, preview: <LayoutPreview id={f.id} /> }))
 
   return (
@@ -105,7 +107,7 @@ export default function CustomizeTab() {
             <button onClick={() => setTheme({ wallpaperMode: 'banner' })} className={'px-3 py-1.5 rounded-md border transition ' + (theme.wallpaperMode === 'banner' ? 'bg-white text-black' : 'border-white/15')}>Banner</button>
           </div>
         </div>
-        {uploadRow('Wallpaper / Video', p.background?.url ?? '', 'bg', 'image/*,video/*', (u) => setBg({ url: u, type: /\.(mp4|webm)$/i.test(u) ? 'video' : 'image' }))}
+        {uploadRow('Wallpaper / Video', p.background?.url ?? '', 'bg', 'image/*,video/*', (u) => setBg({ url: u, type: /\\.(mp4|webm)$/i.test(u) ? 'video' : 'image' }))}
         {uploadRow('Audio', p.music_url ?? '', 'music', 'audio/*', (u) => update({ music_url: u }))}
         {uploadRow('Cursor', p.cursor_url ?? '', 'cursor', 'image/*', (u) => update({ cursor_url: u }))}
       </Card>
@@ -113,6 +115,7 @@ export default function CustomizeTab() {
       <Card title="Information">
         <div><Label>Display Name</Label><input className={inputCls} value={p.display_name ?? ''} onChange={(e) => update({ display_name: e.target.value })} placeholder="Tên hiển thị" /></div>
         <div><Label>Location</Label><input className={inputCls} value={theme.location ?? ''} onChange={(e) => setTheme({ location: e.target.value })} placeholder="Vietnam" /></div>
+        <div><Label>Phone</Label><input className={inputCls} value={p.phone ?? ''} onChange={(e) => update({ phone: e.target.value })} placeholder="+84 123 456..." /></div>
         <div><Label>Page Enter Text</Label><input className={inputCls} value={theme.enterText ?? ''} onChange={(e) => setTheme({ enterText: e.target.value })} placeholder="click to enter" /></div>
         <div>
           <div className="flex items-center justify-between mb-1.5">
@@ -134,6 +137,7 @@ export default function CustomizeTab() {
         {settingRow('Font', labelOf(FONTS, fontId), <FontPreview id={fontId} />, () => setPicker('font'))}
         {settingRow('Background Effect', labelOf(BG_EFFECTS, bgId), <BgPreview id={bgId} />, () => setPicker('bg'))}
         {settingRow('Name Effect', labelOf(NAME_EFFECTS, nameId), <NamePreview id={nameId} />, () => setPicker('name'))}
+        {settingRow('Text Effect', labelOf(TEXT_EFFECTS, textId), <span className={textId ? `fx-${textId}` : ''}>Aa</span>, () => setPicker('text'))}
         {settingRow('Card Layout', labelOf(LAYOUTS, layoutId), <LayoutPreview id={layoutId} />, () => setPicker('layout'))}
         <Toggle label="Mono font" checked={!!theme.monospace} onChange={(v) => setTheme({ monospace: v })} />
       </Card>
@@ -153,6 +157,7 @@ export default function CustomizeTab() {
       {picker === 'font' && <PickerModal title="Chọn Font" options={fontOpts} value={fontId} onSelect={(id) => setTheme({ font: id })} onClose={() => setPicker(null)} />}
       {picker === 'bg' && <PickerModal title="Hiệu ứng nền" options={bgOpts} value={bgId} onSelect={(id) => setTheme({ backgroundEffect: id, effects: id ? [id] : [] })} onClose={() => setPicker(null)} />}
       {picker === 'name' && <PickerModal title="Hiệu ứng tên" options={nameOpts} value={nameId} onSelect={(id) => setTheme({ nameEffect: id })} onClose={() => setPicker(null)} />}
+      {picker === 'text' && <PickerModal title="Hiệu ứng chữ" options={textOpts} value={textId} onSelect={(id) => setTheme({ textEffect: id })} onClose={() => setPicker(null)} />}
       {picker === 'layout' && <PickerModal title="Bố cục thẻ" options={layoutOpts} value={layoutId} onSelect={(id) => setTheme({ layout: id })} onClose={() => setPicker(null)} cols={3} />}
     </div>
   )
