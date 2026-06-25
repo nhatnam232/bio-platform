@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { getVisitorKey } from '../lib/likes'
 import { Profile as ProfileType, Theme } from '../types'
 import Effects from '../components/Effects'
 import BackgroundFX from '../components/BackgroundFX'
@@ -24,7 +25,7 @@ export default function Profile() {
       if (!data) setNotFound(true)
       else {
         setProfile(data as ProfileType)
-        supabase.rpc('increment_views', { profile_username: uname })
+        supabase.rpc('increment_views', { profile_username: uname, p_visitor_key: getVisitorKey() })
       }
       setLoading(false)
     })
