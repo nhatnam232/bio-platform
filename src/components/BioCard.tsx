@@ -10,7 +10,7 @@ import SocialIcon from './SocialIcon'
 
 function renderDescription(text: string, linkColor: string): ReactNode[] {
   const out: ReactNode[] = []
-  const re = /\\[([^\\]]+)\\]\\([^)]+\\)/g
+  const re = /\[([^\]]+)\]\([^)]+\)/g
   let last = 0
   let m: RegExpExecArray | null
   let k = 0
