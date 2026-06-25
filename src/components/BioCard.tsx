@@ -132,20 +132,23 @@ export default function BioCard({
 
       {widgets.length > 0 && (
         <div className="w-full flex flex-col gap-4 mt-2">
-          {widgets.map(w => (
-            <div key={w.id} className="w-full rounded-xl overflow-hidden border border-white/5" style= backgroundColor: hexToRgba(colors.card || '#000000', Math.min(1, cardOpacity + 0.1)) >
-              {w.title && <div className="px-4 py-2.5 font-semibold text-sm border-b border-white/10" style={descStyle}>{w.title}</div>}
-              <div className="p-4 flex flex-col items-center justify-center text-sm" style={descStyle}>
-                {w.type === 'text' && <div className="whitespace-pre-line text-left w-full leading-relaxed">{w.content}</div>}
-                {w.type === 'image' && w.url && <img src={w.url} alt={w.title} className="w-full rounded-lg" />}
-                {w.type === 'youtube' && w.url && <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[YouTube Video: {w.url}]</div>}
-                {w.type === 'spotify' && w.url && <div className="h-20 w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[Spotify Embed: {w.url}]</div>}
-                {w.type === 'link' && w.url && <a href={w.url} target="_blank" rel="noreferrer" className="text-blue-400 underline font-medium break-all text-center">{w.url}</a>}
-                {w.type === 'map' && w.url && <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[Map: {w.url}]</div>}
-                {!['text', 'image', 'youtube', 'spotify', 'link', 'map'].includes(w.type) && <div>[{w.type} widget placeholder]</div>}
+          {widgets.map(w => {
+            const wStyle = { backgroundColor: hexToRgba(colors.card || '#000000', Math.min(1, cardOpacity + 0.1)) }
+            return (
+              <div key={w.id} className="w-full rounded-xl overflow-hidden border border-white/5" style={wStyle}>
+                {w.title && <div className="px-4 py-2.5 font-semibold text-sm border-b border-white/10" style={descStyle}>{w.title}</div>}
+                <div className="p-4 flex flex-col items-center justify-center text-sm" style={descStyle}>
+                  {w.type === 'text' && <div className="whitespace-pre-line text-left w-full leading-relaxed">{w.content}</div>}
+                  {w.type === 'image' && w.url && <img src={w.url} alt={w.title} className="w-full rounded-lg" />}
+                  {w.type === 'youtube' && w.url && <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[YouTube Video: {w.url}]</div>}
+                  {w.type === 'spotify' && w.url && <div className="h-20 w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[Spotify Embed: {w.url}]</div>}
+                  {w.type === 'link' && w.url && <a href={w.url} target="_blank" rel="noreferrer" className="text-blue-400 underline font-medium break-all text-center">{w.url}</a>}
+                  {w.type === 'map' && w.url && <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/50 flex items-center justify-center text-xs opacity-50">[Map: {w.url}]</div>}
+                  {!['text', 'image', 'youtube', 'spotify', 'link', 'map'].includes(w.type) && <div>[{w.type} widget placeholder]</div>}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
