@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -28,6 +29,7 @@ const TABS = [
 ]
 
 const previewScale = { transform: 'scale(0.92)', transformOrigin: 'top center', width: '100%' }
+const hideScroll: CSSProperties = { scrollbarWidth: 'none', msOverflowStyle: 'none' }
 
 export default function Dashboard() {
   const { user, signOut } = useAuth()
@@ -116,7 +118,7 @@ export default function Dashboard() {
           {/* Vertical Menu Sidebar */}
           <div className="flex flex-col gap-2">
             <div className="mb-2 text-[11px] uppercase tracking-[0.18em] text-zinc-500 font-semibold px-3 hidden lg:block">Menu</div>
-            <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 border-b lg:border-b-0 border-white/10" style= scrollbarWidth: 'none', msOverflowStyle: 'none' >
+            <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 border-b lg:border-b-0 border-white/10" style={hideScroll}>
               {TABS.map((t) => (
                 <button 
                   key={t.id} 
@@ -168,7 +170,7 @@ export default function Dashboard() {
                 <div className="absolute top-4 w-full flex justify-center z-10 pointer-events-none">
                   <div className="w-16 h-1.5 bg-white/10 rounded-full"></div>
                 </div>
-                <div className="p-4 pt-12 flex justify-center min-h-[600px] h-[calc(100vh-200px)] overflow-y-auto" style= scrollbarWidth: 'none', msOverflowStyle: 'none' >
+                <div className="p-4 pt-12 flex justify-center min-h-[600px] h-[calc(100vh-200px)] overflow-y-auto" style={hideScroll}>
                   <div style={previewScale}>
                     <BioCard profile={p} preview />
                   </div>
