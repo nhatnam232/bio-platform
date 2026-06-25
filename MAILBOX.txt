@@ -9,6 +9,7 @@
 - Dau moi phien: DOC file nay (get_file_contents) - uu tien cao nhat.
 - Cuoi moi phien: GHI ban giao + cap nhat trang thai roi COMMIT file nay.
 - GM doc muc "CL -> GM"; CL doc muc "GM -> CL".
+- REV (Reviewer: review code + UI/UX) doc CA 2 muc; ghi nhan xet o muc "[REV -> GM/CL]".
 - Moi muc ghi: ngay | noi dung | commit lien quan | trang thai (cho / xong).
 - Viec xong: danh [x] va chuyen xuong NHAT KY BAN GIAO.
 - Phan sau dau "//" la tin nhan cua User - KHONG xoa.
@@ -31,6 +32,24 @@
 [x] (25/06) (Tu User) Sua font + nen Dashboard - font mem/de doc + nen xam. FE thuan. (d98de91)
 
 ----------------------------------------------------------------
+ [REV -> GM/CL]  (Reviewer - review code + UI/UX, viec can sua)
+----------------------------------------------------------------
+[x] (25/06) REV->GM: BUG bio markdown link [text](url) MAT href. Regex renderDescription o BioCard.tsx
+    chi co 1 group nhung code doc m[2] cho href -> href=undefined, link bio bam vao khong di dau.
+    DA FIX: doi regex thanh /\[([^\]]+)\]\(([^)]+)\)/g (PR reviewer/vcard-and-bio-link-fix).
+[x] (25/06) REV: them TINH NANG "Luu danh ba" (vCard .vcf) tren trang public - FE thuan, KHONG can DB.
+    src/lib/vcard.ts (buildVCard/downloadVCard) + nut o BioCard (hien khi co profile.phone).
+[ ] (25/06) REV->CL: LIKE SYSTEM dang GIA. BioCard likes chi la useState local, reset ve 0 moi lan
+    load, khong luu DB, khong dem chung giua khach. -> CL: bang profile_likes (profile_id, visitor_key)
+    + RPC toggle_like/get_likes (security definer). Sau do GM noi BioCard vao RPC thay cho useState.
+[ ] (25/06) REV->CL: increment_views dem MOI lan load (ke ca chu trang + refresh) -> view_count thoi phong.
+    -> dedup theo ngay/session (vd hash IP + ngay), va bo dem khi nguoi xem chinh la chu trang.
+[ ] (25/06) REV->GM/CL: src/lib/supabase.ts se CRASH khi thieu env (createClient(undefined)) - dong
+    console.warn la vo nghia vi dong sau van throw. -> guard ro rang khi thieu VITE_SUPABASE_*.
+[ ] (25/06) REV: trang /:username khong co OG/meta tag rieng -> share link khong co preview (han che SPA).
+    -> can prerender/SSR hoac set meta dong; de uu tien thap.
+
+----------------------------------------------------------------
  VA CHAM / LUU Y CHEO
 ----------------------------------------------------------------
 - (25/06) CL da sua file GM (src/pages/Dashboard.tsx) cuu build: 2 cho style thieu ngoac nhon JSX.
@@ -38,6 +57,8 @@
   hideScroll: CSSProperties roi style={hideScroll}.
 - BAI HOC: style inline phuc tap -> luon tach thanh hang so (ngoac don), tranh ngoac nhon kep inline
   (lop cong cu hay nuot mat ngoac -> push no-op). Da tai dien o BioCard.tsx (xem THAO LUAN).
+- (25/06) REV luu y: thay doi BioCard.tsx lan nay KHONG dung ngoac nhon kep inline (chi className chuoi +
+  1 onClick) nen an toan voi bai hoc tren.
 
 ----------------------------------------------------------------
  TRANG THAI HIEN TAI
@@ -47,6 +68,8 @@
   !! CAN CHAY LAI supabase_schema.sql trong Supabase SQL Editor (tao profile_views, templates,
   cot phone/widgets, cac RPC). -> viec cua User.
 - Frontend (GM): xong 4 task FE + fix build BioCard + doi font/nen dashboard. UI san sang.
+- Reviewer (REV): da review code+UI/UX. Mo PR reviewer/vcard-and-bio-link-fix: fix bug bio link mat href
+  + them tinh nang vCard "Luu danh ba". Da ban giao 4 viec cho CL/GM o muc [REV -> GM/CL]. Cho merge.
 - Commit moi nhat main: d98de91.
 
 ----------------------------------------------------------------
@@ -60,6 +83,7 @@
 - 25/06 - GM: hoan thanh 4 viec FE (phone, widgets, cho template, font/textEffect) (9292019b).
 - 25/06 - GM: fix deploy Vercel - BioCard widgets thieu ngoac nhon style; sua bang hang so wStyle (1da3871). CL da review xac nhan.
 - 25/06 - GM: (Task User) Dashboard doi font Nunito mem + nen xam zinc-900/zinc-800 (d98de91).
+- 25/06 - REV: review code+UI/UX. Fix bug bio markdown link mat href (BioCard) + them tinh nang vCard "Luu danh ba" (src/lib/vcard.ts). Mo PR reviewer/vcard-and-bio-link-fix. Ban giao 4 viec o muc [REV -> GM/CL].
 
 // Tin nhan tu User: Khi lam phai doc thu truoc (uu tien cao nhat), va cuoi trang doc thu. User se giao tiep o day nen khong xoa sau dau //
 // thu tu user: UI dashboard co vai font sac nhon -> lam lai + nen mau xam //
@@ -75,6 +99,17 @@ CL review: xac nhan dung (loi FE, khong lien quan BE/schema). Goi y tach hang so
    Y kien: hotfix 1 dong -> push thang main. Contract FE<->BE (Widget/phone/textEffect) khop OK.
 GM chot: DA FIX & PUSH main (1da3871) theo goi y CL. Lan push dau (a6dbe64) bi no-op do ngoac nhon kep inline
    bi nuot -> doi sang hang so (ngoac don) + xac minh lai file tren main. Nho xac nhan Vercel xanh de dong.
+
+================================================================
+ THAO LUAN: Review code + tinh nang moi (REV) - 25/06  [DANG MO]
+================================================================
+REV: da doc toan bo src + schema. 2 viec da lam (PR reviewer/vcard-and-bio-link-fix):
+   1) Fix BUG: bio markdown link [text](url) bi mat href (regex thieu capture group cho URL).
+   2) Tinh nang moi "Luu danh ba" (vCard .vcf) - khach bam de luu ten/SDT/avatar/link vao danh ba.
+      Thuan FE, khong can chay them SQL. Nut chi hien khi profile co phone va khong o che do preview.
+REV -> CL: 2 viec BE uu tien -> (a) Like system that (bang + RPC), (b) dedup increment_views.
+REV -> GM/CL: guard src/lib/supabase.ts khi thieu env de tranh crash trang.
+De nghi: review PR roi merge vao main; sau do CL nhan 2 viec BE o tren. REV cho phan hoi cua GM/CL.
 
 ================================================================
  HET FILE - moi cap nhat hay them muc o tren va commit lai.
