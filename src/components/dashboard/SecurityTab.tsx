@@ -1,4 +1,48 @@
+import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
+
 export default function SecurityTab() {
+  const { updatePassword, deleteAccount } = useAuth()
+  
+  const [pwdCurrent, setPwdCurrent] = useState('')
+  const [pwdNew, setPwdNew] = useState('')
+  const [pwdStatus, setPwdStatus] = useState('')
+  const [pwdSaving, setPwdSaving] = useState(false)
+
+  const [delStatus, setDelStatus] = useState('')
+  const [delLoading, setDelLoading] = useState(false)
+
+  const handleUpdatePassword = async () => {
+    if (!pwdNew) return
+    setPwdSaving(true)
+    setPwdStatus('')
+    try {
+      await updatePassword(pwdCurrent, pwdNew)
+      setPwdStatus('✅ Đã cập nhật mật khẩu')
+      setPwdCurrent('')
+      setPwdNew('')
+    } catch (err: any) {
+      setPwdStatus('❌ Lỗi: ' + (err.message || 'Không thể đổi mật khẩu'))
+    } finally {
+      setPwdSaving(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('CẢNH BÁO: Toàn bộ dữ liệu profile, avatar, theme và thông tin đăng nhập sẽ bị xoá vĩnh viễn. Bạn có chắc chắn muốn tiếp tục?')) return
+    if (!window.confirm('Bạn có thực sự chắc chắn? Đây là thao tác cuối cùng.')) return
+    
+    setDelLoading(true)
+    setDelStatus('')
+    try {
+      await deleteAccount()
+      // Context will sign user out automatically if delete is successful
+    } catch (err: any) {
+      setDelStatus('❌ Lỗi: ' + (err.message || 'Không thể xoá tài khoản'))
+      setDelLoading(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -14,22 +58,20 @@ export default function SecurityTab() {
           <div className="flex flex-col gap-3 max-w-md">
             <input 
               type="password" 
-              placeholder="Mật khẩu hiện tại" 
-              className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-white focus:ring-1 focus:ring-white outline-none transition disabled:opacity-50"
-              disabled
-            />
-            <input 
-              type="password" 
               placeholder="Mật khẩu mới" 
+              value={pwdNew}
+              onChange={e => setPwdNew(e.target.value)}
               className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-white focus:ring-1 focus:ring-white outline-none transition disabled:opacity-50"
-              disabled
+              disabled={pwdSaving}
             />
-            <button className="self-start mt-3 px-5 py-2.5 bg-white text-black text-sm font-semibold rounded-xl hover:scale-[1.02] active:scale-95 transition disabled:opacity-50 disabled:hover:scale-100" disabled>
-              Cập nhật mật khẩu
+            <button 
+              onClick={handleUpdatePassword}
+              className="self-start mt-3 px-5 py-2.5 bg-white text-black text-sm font-semibold rounded-xl hover:scale-[1.02] active:scale-95 transition disabled:opacity-50 disabled:hover:scale-100" 
+              disabled={pwdSaving || !pwdNew}
+            >
+              {pwdSaving ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
             </button>
-            <div className="mt-4 border border-dashed border-white/20 rounded-lg p-4 text-xs text-zinc-500 text-center bg-black/30 leading-relaxed">
-              [Backend / CL: Hook tính năng đổi mật khẩu Supabase vào khu vực này]
-            </div>
+            {pwdStatus && <div className="mt-2 text-sm text-zinc-400">{pwdStatus}</div>}
           </div>
         </div>
 
@@ -38,12 +80,14 @@ export default function SecurityTab() {
             <span>⚠️</span> Vùng nguy hiểm
           </h3>
           <p className="text-sm text-red-400/80 mb-5 max-w-md leading-relaxed">Hành động này không thể hoàn tác. Toàn bộ dữ liệu profile, avatar, theme và thông tin đăng nhập sẽ bị xoá vĩnh viễn.</p>
-          <button className="px-5 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 text-sm font-semibold rounded-xl hover:bg-red-500/20 transition disabled:opacity-50" disabled>
-            Xoá tài khoản vĩnh viễn
+          <button 
+            onClick={handleDeleteAccount}
+            className="px-5 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 text-sm font-semibold rounded-xl hover:bg-red-500/20 transition disabled:opacity-50" 
+            disabled={delLoading}
+          >
+            {delLoading ? 'Đang xoá...' : 'Xoá tài khoản vĩnh viễn'}
           </button>
-          <div className="mt-4 max-w-md border border-dashed border-red-500/30 rounded-lg p-4 text-xs text-red-500/60 text-center bg-red-500/5 leading-relaxed">
-            [Backend / CL: Viết Edge Function hoặc RPC để xoá hoàn toàn Auth User và các dữ liệu liên quan ở đây]
-          </div>
+          {delStatus && <div className="mt-2 text-sm text-red-400">{delStatus}</div>}
         </div>
       </div>
     </div>
