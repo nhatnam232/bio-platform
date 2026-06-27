@@ -27,6 +27,15 @@ export default {
         'ov-fg': '#ffffff',
         'ov-fg-2': '#9d9d9d',
         'ov-fg-3': '#989898',
+        // zyo.lol account UI tokens
+        'zy-bg': '#0a0a0d',
+        'zy-surface': '#0d0d11',
+        'zy-card': '#141419',
+        'zy-elevated': '#1b1b21',
+        'zy-border': '#26262d',
+        'zy-fg': '#f4f4f5',
+        'zy-fg-2': '#a1a1aa',
+        'zy-fg-3': '#71717a',
       },
       boxShadow: {
         'brand-1': 'rgba(0, 0, 0, 0.1) 0px 10px 15px -3px',
