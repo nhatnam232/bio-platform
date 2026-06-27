@@ -4,6 +4,39 @@
 
 :root {
   color-scheme: dark;
+
+  /* ===== Dashboard design tokens (skill.md) ===== */
+  /* Color */
+  --color-bg-canvas: #000000;
+  --color-bg-surface: #0f172a;
+  --color-bg-sunken: #020617;
+  --color-brand-primary: #2563eb;
+  --color-text-primary: #e2e8f0;
+  --color-text-muted: #64748b;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.2);
+  --color-focus-ring: #2563eb;
+
+  /* Radius */
+  --radius-xs: 5px;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 15px;
+  --radius-xl: 16px;
+  --radius-2xl: 25px;
+
+  /* Shadow */
+  --shadow-1: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px;
+  --shadow-2: rgba(37, 99, 235, 0.3) 0px 0px 20px 0px;
+  --shadow-3: rgba(37, 99, 235, 0.2) 0px 20px 25px -5px;
+  --shadow-4: rgba(37, 99, 235, 0.4) 0px 10px 20px -5px;
+
+  /* Motion */
+  --motion-instant: 300ms;
+  --motion-fast: 400ms;
+  --motion-normal: 500ms;
+  --motion-slow: 600ms;
+  --motion-slower: 800ms;
 }
 
 html,
@@ -24,9 +57,15 @@ h1, h2, h3, h4 {
   letter-spacing: -0.015em;
 }
 
-/* ===== Font mềm / dễ đọc cho dashboard ===== */
+/* ===== Focus-visible (accessibility baseline) ===== */
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ===== Font Outfit cho dashboard (skill.md) ===== */
 .font-soft {
-  font-family: 'Nunito', 'Poppins', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit', 'Outfit Fallback', system-ui, -apple-system, sans-serif;
   letter-spacing: 0;
 }
 .font-soft h1, .font-soft h2, .font-soft h3, .font-soft h4 {
@@ -107,3 +146,13 @@ h1, h2, h3, h4 {
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
 ::-webkit-scrollbar-track { background: transparent; }
 ::selection { background: rgba(255, 255, 255, 0.22); }
+
+/* ===== Reduced motion (WCAG 2.2 — token motion off) ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
