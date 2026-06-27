@@ -3,78 +3,113 @@ import { useContext, useEffect, useState } from 'react'
 import { EditorCtx } from '../../context/EditorContext'
 import { getMyViewsByDay, DailyViews } from '../../lib/stats'
 
+// Shared focus-visible ring (token: color.focus.ring = brand)
+const ovRing =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ov-bg'
+
 export default function OverviewTab() {
   const { user } = useAuth()
   const { p } = useContext(EditorCtx)!
   const [chartData, setChartData] = useState<DailyViews[]>([])
   const [loadingStats, setLoadingStats] = useState(false)
+  const [statsError, setStatsError] = useState('')
+
+  async function loadStats() {
+    if (!user) return
+    setLoadingStats(true)
+    setStatsError('')
+    try {
+      const data = await getMyViewsByDay(7)
+      setChartData(data)
+    } catch (err) {
+      console.error('Failed to load views:', err)
+      setStatsError('Không tải được dữ liệu lượt xem.')
+    } finally {
+      setLoadingStats(false)
+    }
+  }
 
   useEffect(() => {
-    async function loadStats() {
-      if (!user) return
-      setLoadingStats(true)
-      try {
-        const data = await getMyViewsByDay(7)
-        setChartData(data)
-      } catch (err) {
-        console.error('Failed to load views:', err)
-      } finally {
-        setLoadingStats(false)
-      }
-    }
     loadStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  const maxCount = Math.max(...chartData.map((c) => c.count), 1)
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Section header */}
       <div>
-        <h2 className="text-2xl font-bold mb-1.5 text-white">Overview</h2>
-        <p className="text-sm text-zinc-400">Tổng quan về tài khoản của bạn.</p>
+        <h2 className="text-xl font-bold mb-1 text-ov-fg tracking-tight">Overview</h2>
+        <p className="text-sm text-ov-fg-2">Tổng quan về tài khoản của bạn.</p>
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="border border-white/10 rounded-2xl p-5 bg-white/[0.02] hover:bg-white/[0.04] transition">
-          <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
-            <span>👁</span> Lượt xem trang tổng cộng
+
+      {/* Stat cards (cards) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="border border-ov-border rounded-2xl p-5 bg-ov-raised hover:bg-ov-muted transition duration-200">
+          <div className="flex items-center gap-2 text-sm text-ov-fg-2 mb-2">
+            <span aria-hidden="true">👁</span> Lượt xem trang tổng cộng
           </div>
-          <div className="text-4xl font-bold text-white tracking-tight">{p.view_count || 0}</div>
+          <div className="text-3xl font-bold text-ov-fg tracking-tight">{p.view_count || 0}</div>
         </div>
-        <div className="border border-white/10 rounded-2xl p-5 bg-white/[0.02] hover:bg-white/[0.04] transition">
-          <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
-            <span>✉️</span> Email đăng ký
+        <div className="border border-ov-border rounded-2xl p-5 bg-ov-raised hover:bg-ov-muted transition duration-200">
+          <div className="flex items-center gap-2 text-sm text-ov-fg-2 mb-2">
+            <span aria-hidden="true">✉️</span> Email đăng ký
           </div>
-          <div className="text-base font-medium text-white truncate mt-1">{user?.email || 'Đang tải...'}</div>
+          <div className="text-sm font-medium text-ov-fg truncate mt-1" title={user?.email || ''}>{user?.email || 'Đang tải...'}</div>
         </div>
       </div>
 
-      <div className="border border-white/10 rounded-2xl p-6 bg-white/[0.01]">
-        <h3 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
-          <span>📊</span> Thống kê lượt xem (7 ngày qua)
-        </h3>
-        
+      {/* Views chart card */}
+      <div className="border border-ov-border rounded-2xl p-6 bg-ov-strong shadow-ov-1">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h3 className="text-sm font-semibold text-ov-fg flex items-center gap-2">
+            <span aria-hidden="true">📊</span> Thống kê lượt xem (7 ngày qua)
+          </h3>
+          {statsError && (
+            <button
+              onClick={loadStats}
+              className={'text-xs font-medium text-ov-fg-2 hover:text-ov-fg px-2.5 py-1 rounded-lg border border-ov-border hover:bg-ov-muted transition ' + ovRing}
+            >
+              Thử lại
+            </button>
+          )}
+        </div>
+
         {loadingStats ? (
-          <div className="h-40 flex items-center justify-center text-sm text-zinc-500">Đang tải biểu đồ...</div>
+          <div className="h-40 flex items-center justify-center text-sm text-ov-fg-3" role="status" aria-live="polite">
+            Đang tải biểu đồ...
+          </div>
+        ) : statsError ? (
+          <div className="h-40 flex items-center justify-center text-sm text-ov-fg-3" role="alert">
+            ⚠️ {statsError}
+          </div>
         ) : chartData.length === 0 ? (
-          <div className="h-40 flex items-center justify-center text-sm text-zinc-500">Chưa có dữ liệu lượt xem nào.</div>
+          <div className="h-40 flex items-center justify-center text-sm text-ov-fg-3">Chưa có dữ liệu lượt xem nào.</div>
         ) : (
-          <div className="flex items-end gap-2 h-40 pt-4">
+          <ul className="flex items-end gap-2 h-40 pt-4" aria-label="Lượt xem theo ngày">
             {chartData.map((d, i) => {
-              const maxCount = Math.max(...chartData.map(c => c.count), 1)
               const heightPct = Math.max((d.count / maxCount) * 100, 4)
-              
+              const dayLabel = d.day.split('-').slice(1).join('/')
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
-                  <div className="absolute -top-8 bg-black border border-white/10 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                <li
+                  key={i}
+                  tabIndex={0}
+                  aria-label={`${dayLabel}: ${d.count} lượt xem`}
+                  className={'flex-1 flex flex-col items-center gap-2 group relative rounded ' + ovRing}
+                >
+                  <div className="absolute -top-8 bg-ov-bg border border-ov-border text-ov-fg text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition pointer-events-none">
                     {d.count} view
                   </div>
-                  <div className="w-full bg-white/20 rounded-t-sm transition group-hover:bg-white/40" style={{ height: `${heightPct}%` }}></div>
-                  <div className="text-[10px] text-zinc-500 whitespace-nowrap overflow-hidden w-full text-center">
-                    {d.day.split('-').slice(1).join('/')}
-                  </div>
-                </div>
+                  <div
+                    className="w-full bg-ov-fg-2/40 rounded-t-sm transition group-hover:bg-ov-fg-2/70 group-focus-within:bg-ov-fg-2/70"
+                    style={{ height: `${heightPct}%` }}
+                  ></div>
+                  <div className="text-[10px] text-ov-fg-3 whitespace-nowrap overflow-hidden w-full text-center">{dayLabel}</div>
+                </li>
               )
             })}
-          </div>
+          </ul>
         )}
       </div>
     </div>
