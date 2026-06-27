@@ -1,4 +1,5 @@
 import { useContext, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { EditorCtx } from '../../context/EditorContext'
 
@@ -10,6 +11,8 @@ function hash(s: string) {
   for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0 }
   return Math.abs(h)
 }
+
+const swatchStyle = (c: string): CSSProperties => ({ background: c })
 
 const PRESETS = [
   { name: 'Midnight', desc: 'Clean black profile with soft white controls.', sw: ['#0b0b0f', '#e5e7eb'], accent: '#e5e7eb' },
@@ -48,7 +51,9 @@ export default function OverviewTab() {
     { label: 'Link Google account', icon: 'G', done: false },
     { label: 'Reach 10 profile views', icon: '👁', done: (p.view_count || 0) >= 10 },
   ]
-  const pct = Math.round((items.filter((i) => i.done).length / items.length) * 100)
+  const doneCount = items.filter((i) => i.done).length
+  const pct = Math.round((doneCount / items.length) * 100)
+  const barStyle: CSSProperties = { width: pct + '%' }
 
   const managerBtns = [
     { label: 'Change Username', icon: '✎', go: 'setting' },
@@ -97,7 +102,7 @@ export default function OverviewTab() {
               <span className="text-xs text-zy-fg-2 shrink-0">{pct}% completed</span>
             </div>
             <div className="h-2 rounded-full bg-zy-elevated overflow-hidden my-4" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Profile completion">
-              <div className="h-full bg-brand rounded-full transition-all" style= width: pct + '%'  />
+              <div className="h-full bg-brand rounded-full transition-all" style={barStyle} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {items.map((it, i) => (
@@ -177,8 +182,8 @@ export default function OverviewTab() {
                   className={'flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition ' + ring + ' ' + (active ? 'border-brand bg-zy-elevated' : 'border-zy-border bg-zy-elevated/60 hover:bg-zy-elevated')}
                 >
                   <span className="flex -space-x-1 shrink-0" aria-hidden="true">
-                    <span className="w-5 h-5 rounded-full border border-black/40" style= background: pre.sw[0]  />
-                    <span className="w-5 h-5 rounded-full border border-black/40" style= background: pre.sw[1]  />
+                    <span className="w-5 h-5 rounded-full border border-black/40" style={swatchStyle(pre.sw[0])} />
+                    <span className="w-5 h-5 rounded-full border border-black/40" style={swatchStyle(pre.sw[1])} />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold text-zy-fg">{pre.name}</span>
